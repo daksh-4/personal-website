@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Essays - Daksh Mehta</title>
+    <style>
+        body {
+            font-family: Verdana, Geneva, sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #000;
+            background-color: #f6f6ef;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h1 {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        
+        a {
+            color: #000;
+            text-decoration: underline;
+        }
+        
+        a:hover {
+            color: #666;
+        }
+        
+        .nav {
+            margin-bottom: 30px;
+        }
+        
+        .nav a {
+            margin-right: 15px;
+        }
+        
+        .essay-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .essay-list li {
+            margin-bottom: 12px;
+        }
+        
+        .essay-date {
+            color: #666;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        
+        .footer {
+            margin-top: 50px;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        hr {
+            border: none;
+            border-top: 1px solid #ccc;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Essays</h1>
+        
+        <div class="nav">
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="contact.html">Contact</a>
+        </div>
+        
+        <hr>
+        
+        <ul id="essay-list" class="essay-list">
+            <!-- Essays loaded dynamically from essays.json -->
+        </ul>
+        
+        <hr>
+        
+        <div class="footer">
+            &copy; 2026 Daksh Mehta
+        </div>
+    </div>
+
+    <script>
+        async function loadEssays() {
+            try {
+                const response = await fetch('essays.json');
+                const essays = await response.json();
+                const list = document.getElementById('essay-list');
+                
+                essays.forEach(essay => {
+                    const li = document.createElement('li');
+                    const link = document.createElement('a');
+                    link.href = essay.url;
+                    link.textContent = essay.title;
+                    li.appendChild(link);
+                    list.appendChild(li);
+                });
+            } catch (error) {
+                console.log('Could not load essays.json');
+            }
+        }
+        
+        loadEssays();
+    </script>
+</body>
+</html>
