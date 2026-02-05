@@ -170,6 +170,8 @@ def create_essay_html(title, content, date="2026"):
             &copy; 2026 Daksh Mehta
         </div>
     </div>
+    <script data-goatcounter="https://daksh-4.goatcounter.com/count"
+            async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
 '''
