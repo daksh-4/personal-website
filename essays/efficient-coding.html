@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Efficient Coding - Daksh Mehta</title>
+    <style>
+        body {
+            font-family: Verdana, Geneva, sans-serif;
+            font-size: 14px;
+            line-height: 1.8;
+            color: #000;
+            background-color: #f6f6ef;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h1 {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        h2 {
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        
+        h3 {
+            font-size: 15px;
+            font-weight: bold;
+            margin-top: 25px;
+            margin-bottom: 12px;
+        }
+        
+        a {
+            color: #000;
+            text-decoration: underline;
+        }
+        
+        a:hover {
+            color: #666;
+        }
+        
+        .nav {
+            margin-bottom: 30px;
+        }
+        
+        .nav a {
+            margin-right: 15px;
+        }
+        
+        .date {
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 30px;
+        }
+        
+        .content p {
+            margin-bottom: 20px;
+            text-align: justify;
+        }
+        
+        .content code {
+            background-color: #e8e8e0;
+            padding: 2px 5px;
+            font-family: monospace;
+        }
+        
+        .download-link {
+            background-color: #e8e8e0;
+            padding: 15px;
+            margin-top: 30px;
+            margin-bottom: 20px;
+        }
+        
+        .footer {
+            margin-top: 50px;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        hr {
+            border: none;
+            border-top: 1px solid #ccc;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Efficient Coding</h1>
+        <div class="date">February 2026</div>
+        
+        <div class="nav">
+            <a href="../index.html">Home</a>
+            <a href="../articles.html">Essays</a>
+            <a href="../about.html">About</a>
+        </div>
+        
+        <hr>
+        
+        <div class="content">
+            <p>There is a grotesque drawing in almost every introductory neuroscience textbook. It is called the <a href="https://en.wikipedia.org/wiki/Cortical_homunculus">sensory homunculus</a>. It looks like a man, but wrong. His hands are the size of watermelons, his lips are gigantic and his torso and legs are shrivelled. It is a map of how the brain sees the body. The diagram is usually presented as a fun fact: "Look, your brain cares more about your thumb than your entire back."</p>
+            
+            <p>I have been spending part of my Master's thesis looking at the mathematics of how the brain encodes information, specifically through the lens of efficient coding, which provides a simple and elegant explanation for variation in sensory encoding precision.</p>
+            
+            <p>The logic is simple: allocate resources based on probability.</p>
+            
+            <p>Imagine you are designing a surveillance system for a house. You have 10 high-definition cameras and 10 cheap, grainy webcams. Where do you put the HD ones? You don't put them in the attic or the basement closet. You put them at the front door and the living room, the places where things are most likely to happen. The brain does the same thing. You touch things with your hands constantly so the probability of a tactile event there is high. So, the brain allocates "cortical real estate" to the hands. You rarely touch things with your knee. So, the knee gets the cheap webcam. The homunculus is just a visual representation of a probability distribution.</p>
+            
+            <p>To be efficient, the brain must distort reality.</p>
+            
+            <p>In my work, I've been looking at how this applies to vision. Humans look at cardinal orientations much more often (horizontal and vertical) than obliques (lines at an angle). Following, the efficient coding logic, the brain (specifically the visual cortex) should have higher resolution in picking up cardinal angles than obliques. And we do. But when you allocate more neurons to a specific range of inputs, you are effectively performing a coordinate transformation. You are taking a small slice of the physical world and stretching it out in the neural world, taking the "common" and expanding it and taking the "rare" and squashing it.</p>
+            
+            <p>This warping creates a conflict. We usually think of the brain as a Bayesian machine, a machine that uses prior knowledge to guess the state of the world. In standard Bayesian theory, if you are unsure about what you are seeing, your brain should bias your perception toward what is most likely. This is called attraction.</p>
+            
+            <p>"If you hear hoofbeats, think horses not zebras". You are "attracted" and more likely to default to what you are familiar with when faced with making a predictions based on an unreliable source. But efficient coding suggests the opposite is possible in certain conditions. Because the brain stretches out the space where common things happen (to give them high resolution), it can sometimes make things seem further apart than they actually are. This causes a repulsive bias.</p>
+            
+            <p>I've been studying a theory by Wei and Stocker (2015) that resolves this paradox. It suggests our perception is a dynamic tug-of-war between these two forces. Attraction: "This input is noisy, so I'll assume it's probably just the average thing I usually see." and repulsion: "I have zoomed in so much on this common area that I see tiny differences as huge gaps."</p>
+            
+            <p>The direction of the prevailing prediction depends on the noise in the signal. When the signal is clear and reliable, the warping in the sensory space makes the decoding system hypersensitive to differences, pushing your estimate away from the average. But when the signal is blurry or noisy, the prediction falls back onto prior. It may not seem immediately obvious as to why that is. Predictions are constructed based on combining the distribution of our prior experiences of the environmental stimuli and the distribution of possible measurements given a certain environmental stimulus (this is Bayes' rule). When there is lots of noise, there can be many possible measurements based on a single environmental stimulus. For example, when trying to drive in a snowstorm, looking outside the window to judge the direction of the road isn't very informative of the road direction, so instead we rely on our prevailing knowledge about roads: that they are normally straight.</p>
+            
+            <p>We assume that if we have a "better" eye or a "better" brain, we see the world more accurately. But the mathematics of efficient coding and Fisher Information (a way of measuring the 'sharpness' of the neural lens) suggests something different. A perfectly efficient brain doesn't show you the world as it is. It shows you a world that has been stretched, squashed and edited to maximise information where it matters and delete it where it doesn't.</p>
+            
+            <div class="download-link">
+                <strong>Further reading:</strong> For a more mathematically motivated intuitive explanation of these forces, please try out <a href="../files/efficient-coding-questions.pdf">these questions I wrote</a>. There are likely to be errors and miscommunication as I am still fully understanding these concepts too.
+            </div>
+        </div>
+        
+        <hr>
+        
+        <div class="footer">
+            &copy; 2026 Daksh Mehta
+        </div>
+    </div>
+    <script data-goatcounter="https://daksh-4.goatcounter.com/count"
+            async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

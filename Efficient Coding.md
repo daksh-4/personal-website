@@ -1,0 +1,24 @@
+There is a grotesque drawing in almost every introductory neuroscience textbook. It is called the [sensory homonculus](https://en.wikipedia.org/wiki/Cortical_homunculus). It looks like a man, but wrong. His hands are the size of watermelons, his lips are gigantic and his torso and legs are shrivelled. It is a map of how the brain sees the body. The diagram is usually presented as a fun fact: "Look, your brain cares more about your thumb than your entire back."
+
+I have been spending part of my Master’s thesis looking at the mathematics of how the brain encodes information, specifically through the lens of efficient coding, which provides a simple and elegant explanation for variation in sensory encoding precision. 
+
+The logic is simple: allocate resources based on probability.
+
+Imagine you are designing a surveillance system for a house. You have 10 high-definition cameras and 10 cheap, grainy webcams. Where do you put the HD ones? You don't put them in the attic or the basement closet. You put them at the front door and the living room, the places where things are most likely to happen. The brain does the same thing. You touch things with your hands constantly so the probability of a tactile event there is high. So, the brain allocates "cortical real estate" to the hands. You rarely touch things with your knee. So, the knee gets the cheap webcam. The homonculus is just a visual representation of a probability distribution. 
+
+To be efficient, the brain must distort reality. 
+
+In my work, I've been looking at how this applies to vision. Humans look at cardinal orientations much more often (horizontal and vertical) than obliques (lines at an angle). Following, the efficient coding logic, the brain (specifically the visual cortex) should have higher resolution in picking up cardinal angles than obliques. And we do. But when you allocate more neurons to a specific range of inputs, you are effectively performing a coordinate transformation. You are taking a small slice of the physical world and stretching it out in the neural world, taking the "common" and expanding it and taking the "rare" and squashing it. 
+
+This warping creates a conflict. We usually think of the brain as a Bayesian machine, a machine that uses prior knowledge to guess the state of the world. In standard Bayesian theory, if you are unsure about what you are seeing, your brain should bias your perception toward what is most likely. This is called attraction.
+
+"If you hear hoofbeats, think horses not zebras". You are "attracted" and more likely to default to what you are familiar with when faced with making a predictions based on an unreliable source. But efficient coding suggests the opposite is possible in certain conditions. Because the brain stretches out the space where common things happen (to give them high resolution), it can sometimes make things seem further apart than they actually are. This causes a repulsive bias. 
+
+I’ve been studying a theory by Wei and Stocker (2015) that resolves this paradox. It suggests our perception is a dynamic tug-of-war between these two forces. Attraction: "This input is noisy, so I’ll assume it’s probably just the average thing I usually see." and repulsion: "I have zoomed in so much on this common area that I see tiny differences as huge gaps."
+
+The direction of the prevailing prediction depends on the noise in the signal. When the signal is clear and reliable, the warping in the sensory space makes the decoding system hypersensitive to differences, pushing your estimate away from the average. But when the signal is blurry or noisy, the prediction falls back onto prior. It may not seem immediately obvious as to why that is. Predictions are constructed based on combining the distribution of our prior experiences of the environmental stimuli and the distribution of possible measurements given a certain environmental stimulus (this is Bayes' rule). When there is lots of noise, there can be many possible measurements based on a single environmental stimulus. For example, when trying to drive in a snowstorm, looking outside the window to judge the direction of the road isn't very informative of the road direction, so instead we rely on our prevailing knowledge about roads: that they are normally straight. 
+
+We assume that if we have a "better" eye or a "better" brain, we see the world more accurately. But the mathematics of efficient coding and Fisher Information (a way of measuring the 'sharpness' of the neural lens) suggests something different. A perfectly efficient brain doesn't show you the world as it is. It shows you a world that has been stretched, squashed and edited to maximise information where it matters and delete it where it doesn't.
+
+For a more mathematically motivated intuitive explanation of these forces, please try out these questions I wrote. There are likely to be errors and miscommunication as I am still fully understanding these concepts too. 
+
