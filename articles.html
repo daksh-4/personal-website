@@ -102,12 +102,27 @@
                 const essays = await response.json();
                 const list = document.getElementById('essay-list');
                 
+                // Sort by date, newest first
+                essays.sort((a, b) => b.date.localeCompare(a.date));
+                
+                const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                                   'July', 'August', 'September', 'October', 'November', 'December'];
+                
                 essays.forEach(essay => {
                     const li = document.createElement('li');
                     const link = document.createElement('a');
                     link.href = essay.url;
                     link.textContent = essay.title;
                     li.appendChild(link);
+                    
+                    if (essay.date) {
+                        const [year, month] = essay.date.split('-');
+                        const dateSpan = document.createElement('span');
+                        dateSpan.className = 'essay-date';
+                        dateSpan.textContent = monthNames[parseInt(month) - 1] + ' ' + year;
+                        li.appendChild(dateSpan);
+                    }
+                    
                     list.appendChild(li);
                 });
             } catch (error) {
