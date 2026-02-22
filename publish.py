@@ -37,22 +37,52 @@ def markdown_to_html(md_text):
     # Convert inline code
     html = re.sub(r'`([^`]+)`', r'<code>\1</code>', html)
     
-    # Split into paragraphs (double newline)
-    paragraphs = re.split(r'\n\s*\n', html.strip())
-    
+    # Split into blocks (double newline)
+    blocks = re.split(r'\n\s*\n', html.strip())
+
+    def process_list_block(lines):
+        # Determine if unordered or ordered list
+        is_ordered = all(re.match(r"^\s*\d+\.\s+", ln) for ln in lines if ln.strip() != '')
+        tag = 'ol' if is_ordered else 'ul'
+        items = []
+        for ln in lines:
+            ln = ln.strip()
+            if not ln:
+                continue
+            m_ord = re.match(r"^\s*\d+\.\s+(.*)$", ln)
+            m_un = re.match(r"^\s*[-\*]\s+(.*)$", ln)
+            if m_ord:
+                items.append(m_ord.group(1))
+            elif m_un:
+                items.append(m_un.group(1))
+            else:
+                # fallback: whole line
+                items.append(ln)
+        inner = '\n'.join(f'                <li>{item}</li>' for item in items)
+        return f'<{tag}>\n{inner}\n            </{tag}>'
+
     processed = []
-    for p in paragraphs:
-        p = p.strip()
-        if not p:
+    for blk in blocks:
+        blk = blk.strip()
+        if not blk:
             continue
-        # Don't wrap headers in <p>
-        if p.startswith('<h') or p.startswith('<ul') or p.startswith('<ol'):
-            processed.append(p)
-        else:
-            # Replace single newlines with spaces within paragraph
-            p = re.sub(r'\n', ' ', p)
-            processed.append(f'<p>{p}</p>')
-    
+        # If block is a header already converted
+        if blk.startswith('<h'):
+            processed.append(blk)
+            continue
+        # Check if block looks like a list (lines starting with -, * or numbered)
+        lines = blk.split('\n')
+        list_like = any(re.match(r"^\s*[-\*]\s+", ln) or re.match(r"^\s*\d+\.\s+", ln) for ln in lines)
+        if list_like:
+            # Process as list
+            list_html = process_list_block(lines)
+            processed.append(list_html)
+            continue
+
+        # Normal paragraph: replace single newlines with spaces
+        p = re.sub(r'\n', ' ', blk)
+        processed.append(f'<p>{p}</p>')
+
     return '\n            \n            '.join(processed)
 
 def create_essay_html(title, content, date="2026"):

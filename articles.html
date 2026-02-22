@@ -102,12 +102,17 @@
                 const essays = await response.json();
                 const list = document.getElementById('essay-list');
                 
-                // Sort by date, newest first
-                essays.sort((a, b) => b.date.localeCompare(a.date));
+                // Sort by date, newest first. Missing dates are treated as very old.
+                essays.sort((a, b) => (b.date || '0000-00').localeCompare(a.date || '0000-00'));
                 
                 const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
                                    'July', 'August', 'September', 'October', 'November', 'December'];
                 
+                if (!essays || essays.length === 0) {
+                    const empty = document.createElement('li');
+                    empty.textContent = 'No essays found.';
+                    list.appendChild(empty);
+                } else {
                 essays.forEach(essay => {
                     const li = document.createElement('li');
                     const link = document.createElement('a');
@@ -125,6 +130,7 @@
                     
                     list.appendChild(li);
                 });
+                }
             } catch (error) {
                 console.log('Could not load essays.json');
             }

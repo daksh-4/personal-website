@@ -3,7 +3,6 @@
 # Usage: ./update-essays.sh
 
 cd "$(dirname "$0")"
-
 echo "[" > essays.json
 
 first=true
@@ -16,14 +15,40 @@ for file in essays/*.html; do
             # Fallback: use filename without extension
             title=$(basename "$file" .html | sed 's/-/ /g')
         fi
-        
+
+        # Extract date from <div class="date"> (e.g., "February 2026" or "2026")
+        rawdate=$(grep -oP '(?<=<div class="date">)[^<]+' "$file" | head -n1 | tr -d '\r')
+        date_iso=""
+        if [ -n "$rawdate" ]; then
+            # Try to parse Month Year
+            month=$(echo "$rawdate" | awk '{print $1}')
+            year=$(echo "$rawdate" | awk '{print $2}')
+            case "$month" in
+                January) mm=01;; February) mm=02;; March) mm=03;; April) mm=04;; May) mm=05;; June) mm=06;;
+                July) mm=07;; August) mm=08;; September) mm=09;; October) mm=10;; November) mm=11;; December) mm=12;;
+                *) mm="";;
+            esac
+            if [ -n "$mm" ] && [ -n "$year" ]; then
+                date_iso="$year-$mm"
+            else
+                # If only a year provided, use YYYY-01
+                if echo "$rawdate" | grep -qE '^[0-9]{4}$'; then
+                    date_iso="$rawdate-01"
+                fi
+            fi
+        fi
+
         if [ "$first" = true ]; then
             first=false
         else
             echo "," >> essays.json
         fi
-        
-        printf '    { "title": "%s", "url": "%s" }' "$title" "$file" >> essays.json
+
+        if [ -n "$date_iso" ]; then
+            printf '    { "title": "%s", "url": "%s", "date": "%s" }' "$title" "${file#./}" "$date_iso" >> essays.json
+        else
+            printf '    { "title": "%s", "url": "%s" }' "$title" "${file#./}" >> essays.json
+        fi
     fi
 done
 
