@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Skills Workshop - Daksh Mehta</title>
+    <style>
+        body {
+            font-family: Verdana, Geneva, sans-serif;
+            font-size: 14px;
+            line-height: 1.8;
+            color: #000;
+            background-color: #f6f6ef;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h1 {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        h2 {
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        
+        h3 {
+            font-size: 15px;
+            font-weight: bold;
+            margin-top: 25px;
+            margin-bottom: 12px;
+        }
+        
+        a {
+            color: #000;
+            text-decoration: underline;
+        }
+        
+        a:hover {
+            color: #666;
+        }
+        
+        .nav {
+            margin-bottom: 30px;
+        }
+        
+        .nav a {
+            margin-right: 15px;
+        }
+        
+        .date {
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 30px;
+        }
+        
+        .content p {
+            margin-bottom: 20px;
+            text-align: justify;
+        }
+        details {
+            background-color: #e8e8e0;
+            padding: 10px 12px;
+            margin: 12px 0;
+        }
+        details summary {
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 8px;
+        }
+        details p {
+            margin: 6px 0 0 0;
+        }
+        
+        .content code {
+            background-color: #e8e8e0;
+            padding: 2px 5px;
+            font-family: monospace;
+        }
+        
+        .footer {
+            margin-top: 50px;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        hr {
+            border: none;
+            border-top: 1px solid #ccc;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Research Skills Workshop</h1>
+        <div class="date">2026</div>
+        
+        <div class="nav">
+            <a href="../index.html">Home</a>
+            <a href="../articles.html">Essays</a>
+            <a href="../about.html">About</a>
+        </div>
+        
+        <hr>
+        
+        <div class="content">
+            <p>It's safe to say we have entered an entirely new era with never before seen levels of competition for specialty training. One of the new metrics of suitability for an ST1/CST/IMT training post has now become research output <a href=" http://gomerblog.com/2019/07/neurosurgeon-replaced/">output</a>. This is a shame in my opinion. The original idea for even having research training as part of the medical school curriculum was to get some appreciation for the scientific process and becoming more comfortable interpreting primary literature, which in my opinion is a core competency of being a physician. That being said, one can be a perfectly capable resident physician without having published, so long as they have an understanding of literature. I think most people would agree with me but you can let me know if you don't.</p>
+            
+            <p>The irony is that opportunities during medical school also no longer aim to help students gain skills in interpreting primary literature, critically appraising sources of information, trying new methods and designing experiments. Projects are often review based and a medical student's role is largely grunt work which can be done without any major cognitive involvement, just grinding it out.</p>
+            
+            <p>So to be honest, research for most students is a chore, it sucks out all the interest, leaving you burnt out and less likely to see a paper through to completion. The unfortunate reality is that despite this, we still have to publish to get the necessary points so how can we make the most of this situation?</p>
+            
+            <p>To me research is about asking questions and some of the best practice in learning how to ask meaningful questions is to read, discuss and present papers and your own work. The rest of this essay includes some resources I produced for a workshop I ran at a student Neurology and Neurosurgery conference.</p>
+            
+            <p>The goal of this workshop is to maybe provide some motivation for how research can be interesting by discussing and trying to find errors in the following fake papers.</p>
+            
+            <p>The only pre-requisite knowledge is the definition of a p-value, which is the probability of obtaining test results at least as extreme as the observed results, assuming that the null hypothesis is true.</p>
+            
+            <p>Efficacy of Intravenous Cerebrolysin-X in Improving Cognitive Performance in Sleep-Deprived Medical Students.</p>
+            
+            <p>Trial Methodology: - Design: Double-blind, randomised controlled trial. - Population: 100 medical students at a major teaching hospital. - Intervention: Participants were randomised to receive either Cerebrolysin-X (a novel neuro-peptide cocktail) or saline placebo IV after a 12-hour study session. - Endpoints: Cognitive performance was measured using the "Montreal Cognitive Assessment II" (MoCA-II) at 1 hour post-infusion.</p>
+            
+            <p>Statistical Methodology: - To ensure we captured all possible benefits, we compared the groups using a paired student's t test across 40 different sub-domains of cognition (memory, recall, backwards counting, naming, abstraction, delayed recall at 5 mins, 10 mins, 15 mins, etc.) and 10 different mood scores. - Significance was set at p < 0.05.</p>
+            
+            <p>Results: - There was no significant difference in the total overall MoCA-II score between the two groups (p=0.42). - However, in the sub-group analysis of "delayed recall of 5-letter words starting with S," the treatment group scored significantly higher than placebo (p=0.04). - Conclusion: Cerebrolysin-X significantly improves specific domains of memory recall in sleep-deprived students and should be considered for routine use.</p>
+            
+            <details>
+                <summary>Show solution</summary>
+                <p>If you measure 50 different variables with a p-value threshold of 0.05, by definition of a p-value you are almost guaranteed to find at least 2 or 3 "significant" results purely by random chance. This is known as p-hacking, which is the practice of trying to find subgroup analyses that reveal a significant p-value. Look for the primary endpoint, if the primary endpoint failed, there is likely no statistical significance, no matter what interesting subgroups were found later.</p>
+            </details>
+            
+            <p>Title: A Novel Hydrogel-Coated Ventriculoperitoneal Shunt Catheter for Hydrocephalus: A Prospective Cohort Study.</p>
+            
+            <p>Trial Methodology:     - Design: Prospective single-arm open-label study.  - Population: 50 patients undergoing shunt insertion for Normal Pressure Hydrocephalus (NPH). - Intervention: All patients received the new "HydroFlow 3000" shunt catheter, which is coated in a special anti-protein hydrogel. - Primary Endpoint: The "Laminar Flow Coefficient" (LFC) observed on post-operative MRI flow studies at 6 weeks.</p>
+            
+            <p>Statistical Methodology: - The LFC of the patients was compared to the manufacturer's reference range for "perfect laminar flow" in laboratory tubing. - Secondary outcomes included patient mortality and shunt revision rate.</p>
+            
+            <p>Results: - The "HydroFlow 3000" demonstrated an average Laminar Flow Coefficient of 0.95, which is significantly close to perfect laboratory flow. - Clinically, 2 patients died from infection and 10 patients required revision surgery for blockage within 3 months. - Conclusion: The HydroFlow 3000 achieves near-perfect hydrodynamic properties and represents a breakthrough in shunt physics.</p>
+            
+            <details>
+                <summary>Show solution</summary>
+                <p>The study claims success because the physics of the shunt was perfect on MRI. But the reality is that there was a lot of complications, it doesn't matter if the fluid flows perfectly if the patient has major complications from infection or the shunt gets blocked anyway. This doesn't mean that optimising for flow coefficients isn't important, but in translational research the main goal is always improving patient outcomes.</p>
+            </details>
+            
+            <p>Title: Effects of High-Dose Caffeine on Essential Tremor Amplitude.</p>
+            
+            <p>Trial Methodology: - Design: Prospective study. - Population: Bring in 100 patients with a diagnosis of essential tremor. Only include those who have active and severe tremor on the day of the study.  - Intervention: Patients were measured at baseline. They were then given a "high dose" caffeine pill (400mg). They were measured again 2 hours later.</p>
+            
+            <p>Statistical Methodology: - Paired t-test comparing the tremor amplitude before and after caffeine.</p>
+            
+            <p>Results: - Baseline tremor amplitude was very high (mean 8.5/10). - Two hours after caffeine, the mean tremor amplitude dropped to 6.2/10. - This reduction was statistically significant (p < 0.05). - Conclusion: Contrary to popular belief, high-dose caffeine improves Essential Tremor and should be investigated as a therapeutic agent.</p>
+            
+            <details>
+                <summary>Show solution</summary>
+                <p>They selected patients only when their tremor was "severe". Symptoms naturally fluctuate. If you pick people on their worst day, they will statistically be better on the next measurement, regardless of what you give them (even if you give them poison). Be cautious of studies that select patients based on "high severity" at baseline without a control group to correct for natural improvement.</p>
+            </details>
+            
+            <p>Title: The Impact of Classical Music on Neurosurgical Operative Time.</p>
+            
+            <p>Trial Methodology: - Design: Retrospective Cohort Study of 500 craniotomies at a single centre. - Groups: Operations were categorised into "Music Played" (n=250) vs "Silence" (n=250) based on theatre logs. - Endpoint: Total operative time (skin-to-skin).</p>
+            
+            <p>Statistical Methodology: - An independent samples t-test was used to compare the mean operative time between the two groups. - Data is presented as Mean ± Standard Deviation.</p>
+            
+            <p>Results: - Music Group: Mean operative time = 145 ± 20 mins. - Silence Group: Mean operative time = 190 ± 45 mins. - Difference is statistically significant (p < 0.05). - Conclusion: Playing classical music significantly reduces operative time in neurosurgery. We recommend all theatres play Mozart to improve efficiency.</p>
+            
+            <details>
+                <summary>Show solution</summary>
+                <p>They used a t test to compare the two categories, implying that music caused a reduction in operative time. An issue in retrospective non-randomised studies confounding factors can often be an issue. It's possible that there are other factors at play affecting operating time instead. In retrospective studies it is important to adjust for things like surgeon experience, type of surgery and complexity.</p>
+            </details>
+            
+            <p>Title: Efficacy of NeuroCalm Supplement in Preventing Chronic Migraine Transformation.</p>
+            
+            <p>Trial Methodology: - Design: Randomised Controlled Trial (n=2,000). - Population: Patients with episodic migraine which has not yet transformed to chronic migraine (4-8 days/month).  - Intervention: NeuroCalm (Magnesium + Riboflavin blend) vs Placebo for 12 months. - Primary Endpoint: Transformation to Chronic Migraine (>15 headache days/month).</p>
+            
+            <p>Statistical Methodology: - Data was analysed using Chi-squared tests. - We calculated the Relative Risk Reduction (RRR) to demonstrate efficacy.</p>
+            
+            <p>Results: - In the Placebo group, 2.0% of patients developed chronic migraine. - In the NeuroCalm group, 1.0% of patients developed chronic migraine. - Calculated Efficacy: The treatment resulted in a massive 50% reduction in the risk of developing chronic migraine. - Conclusion: NeuroCalm cuts the risk of disease progression in half. There is a clear strong trend towards significance warranting clinical use.</p>
+            
+            <details>
+                <summary>Show solution</summary>
+                <p>The absolute risk reduction is only 1%, meaning you have to treat 100 people to stop one person getting a migraine (number needed to treat = 100). That is a very poor drug but "50% effective" sounds amazing.</p>
+            </details>
+            
+            <p>Title: Survival Benefit of Early Detection of Gliobastoma via Circulating Tumour DNA</p>
+            
+            <p>Trial Methodology: - Design: Prospective Cohort Study.    - Population: 10,000 asymptomatic adults aged 50-70 screened annually with a novel ctDNA blood test. - Comparison: Outcomes were compared to a matched historical control group from the "Cancer Registry" who were diagnosed via standard symptoms (seizures/headaches). - Primary Endpoint: 5-Year Survival Rate from the date of diagnosis.</p>
+            
+            <p>Statistical Methodology: - Kaplan-Meier survival curves were generated. - Cox Proportional Hazards model adjusted for age and comorbidities.</p>
+            
+            <p>Results: - Screened Group: 20 patients were diagnosed with GBM. 5-Year Survival = 45%. - Control Group: 5-Year Survival = 5%. - P-value: < 0.001. - Conclusion: Screening for GBM with ctDNA dramatically improves 5-year survival rates and should be implemented in primary care.</p>
+            
+            <details>
+                <summary>Show solution</summary>
+                <p>The flaw here is lead-time bias. Screening detects cancer earlier (e.g. at age 50 instead of 52). Even if the patient dies at 55 in both scenarios, the screened patient has "survived" for 5 years, while the control patient "survived" for 3 years. Solution would be to measure overall mortality rates.</p>
+            </details>
+            
+            <p>Title: Nusinersen versus Sham Control in Infantile-Onset Spinal Muscular Atrophy (SMA). (This one is a real study)</p>
+            
+            <p>- Trial Methodology:     - Design: Randomised, double-blind, sham-controlled Phase 3 trial.     - Population: Infants with SMA Type 1 (genetic diagnosis).     - Intervention: Intrathecal injection of Nusinersen vs. Sham procedure (skin prick).     - Primary Endpoint: Motor-milestone response (e.g., head control, sitting, kicking) assessed by the HINE-2 scale.</p>
+            
+            <p>- Statistical Methodology:     - Interim analysis was pre-specified and conducted when 80 infants had been followed for at least 6 months.</p>
+            
+            <p>If they found that Nusinersen was improving motor function, should they continue sham controls where there is no motor improvement?</p>
+            
+            <details>
+                <summary>Show solution</summary>
+                <p>A statistical boundary (Haybittle-Peto) was used to determine if the trial should be stopped early for overwhelming efficacy.</p>
+            </details>
+            
+            <p>- Results:     - In the interim analysis, 41% of infants in the Nusinersen group had a motor-milestone response, compared with 0% in the control group (P<0.001).     - The likelihood of event-free survival was significantly higher in the Nusinersen group (Hazard Ratio 0.53; P=0.005).     - Conclusion: The trial was terminated early because Nusinersen resulted in significantly better motor function and survival than sham control.</p>
+            
+            <p>This is an ethical decision to treat the placebo group too if the drug works.</p>
+        </div>
+        
+        <hr>
+        
+        <div class="footer">
+            &copy; 2026 Daksh Mehta
+        </div>
+    </div>
+    <script data-goatcounter="https://daksh-4.goatcounter.com/count"
+            async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
