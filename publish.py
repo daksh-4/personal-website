@@ -41,7 +41,9 @@ def markdown_to_html(md_text):
     blocks = re.split(r'\n\s*\n', html.strip())
 
     def process_list_block(lines):
-        # Determine if unordered or ordered list
+        # Build list items from lines that start with list markers.
+        # If non-list lines appear in the block (e.g. "Header:\n- a\n- b"),
+        # those will be handled outside this function by splitting runs.
         is_ordered = all(re.match(r"^\s*\d+\.\s+", ln) for ln in lines if ln.strip() != '')
         tag = 'ol' if is_ordered else 'ul'
         items = []
@@ -70,13 +72,39 @@ def markdown_to_html(md_text):
         if blk.startswith('<h'):
             processed.append(blk)
             continue
-        # Check if block looks like a list (lines starting with -, * or numbered)
+        # Check if block contains any list lines. If so, split the block
+        # into runs of list-lines and non-list-lines so we don't accidentally
+        # include inline list markers inside paragraphs.
         lines = blk.split('\n')
-        list_like = any(re.match(r"^\s*[-\*]\s+", ln) or re.match(r"^\s*\d+\.\s+", ln) for ln in lines)
-        if list_like:
-            # Process as list
-            list_html = process_list_block(lines)
-            processed.append(list_html)
+        runs = []
+        current_run = {'type': None, 'lines': []}
+
+        def line_type(ln):
+            if re.match(r"^\s*[-\*]\s+", ln) or re.match(r"^\s*\d+\.\s+", ln):
+                return 'list'
+            return 'text'
+
+        for ln in lines:
+            lt = line_type(ln)
+            if current_run['type'] is None:
+                current_run = {'type': lt, 'lines': [ln]}
+            elif current_run['type'] == lt:
+                current_run['lines'].append(ln)
+            else:
+                runs.append(current_run)
+                current_run = {'type': lt, 'lines': [ln]}
+        if current_run['lines']:
+            runs.append(current_run)
+
+        if any(r['type'] == 'list' for r in runs):
+            for r in runs:
+                if r['type'] == 'list':
+                    list_html = process_list_block(r['lines'])
+                    processed.append(list_html)
+                else:
+                    # normal paragraph from text run
+                    p = re.sub(r'\n', ' ', '\n'.join(r['lines']).strip())
+                    processed.append(f'<p>{p}</p>')
             continue
 
         # Normal paragraph: replace single newlines with spaces

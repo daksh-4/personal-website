@@ -1,7 +1,7 @@
 [
-    { "title": "The Acute Neurology Unit", "url": "essays/acute-neurology-unit.html" },
-    { "title": "Bennett Medicines Symposium", "url": "essays/bennett-medicines-symposium.html" },
-    { "title": "Efficient Coding", "url": "essays/efficient-coding.html" },
-    { "title": "Gatsby Bridging Programme", "url": "essays/gatsby-bridging-programme.html" },
-    { "title": "Research Skills Workshop", "url": "essays/research-skills-workshop.html" }
+    { "title": "The Acute Neurology Unit", "url": "essays/acute-neurology-unit.html", "date": "2025-05" },
+    { "title": "Bennett Medicines Symposium", "url": "essays/bennett-medicines-symposium.html", "date": "2025-12" },
+    { "title": "Efficient Coding", "url": "essays/efficient-coding.html", "date": "2026-02" },
+    { "title": "Gatsby Bridging Programme", "url": "essays/gatsby-bridging-programme.html", "date": "2025-08" },
+    { "title": "Research Skills Workshop", "url": "essays/research-skills-workshop.html", "date": "2026-01" }
 ]

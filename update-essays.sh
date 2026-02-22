@@ -17,7 +17,7 @@ for file in essays/*.html; do
         fi
 
         # Extract date from <div class="date"> (e.g., "February 2026" or "2026")
-        rawdate=$(grep -oP '(?<=<div class="date">)[^<]+' "$file" | head -n1 | tr -d '\r')
+        rawdate=$(sed -n 's/.*<div class="date">\([^<]*\)<\/div>.*/\1/p' "$file" | head -n1 | tr -d '\r')
         date_iso=""
         if [ -n "$rawdate" ]; then
             # Try to parse Month Year
