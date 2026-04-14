@@ -38,14 +38,20 @@ for file in essays/*.html; do
             fi
         fi
 
+        category=$(sed -n 's/.*<meta name="category" content="\([^"]*\)".*/\1/p' "$file" | head -n1 | tr -d '\r')
+
         if [ "$first" = true ]; then
             first=false
         else
             echo "," >> essays.json
         fi
 
-        if [ -n "$date_iso" ]; then
+        if [ -n "$date_iso" ] && [ -n "$category" ]; then
+            printf '    { "title": "%s", "url": "%s", "date": "%s", "category": "%s" }' "$title" "${file#./}" "$date_iso" "$category" >> essays.json
+        elif [ -n "$date_iso" ]; then
             printf '    { "title": "%s", "url": "%s", "date": "%s" }' "$title" "${file#./}" "$date_iso" >> essays.json
+        elif [ -n "$category" ]; then
+            printf '    { "title": "%s", "url": "%s", "category": "%s" }' "$title" "${file#./}" "$category" >> essays.json
         else
             printf '    { "title": "%s", "url": "%s" }' "$title" "${file#./}" >> essays.json
         fi

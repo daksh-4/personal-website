@@ -14,6 +14,10 @@ def markdown_to_html(md_text):
     """Convert markdown to HTML."""
     html = md_text
     
+    # Extract frontmatter category if present
+    category_match = re.search(r'^---\n.*?\bcategory:\s*([^\n]+).*?---\n', html, flags=re.DOTALL | re.IGNORECASE)
+    category = category_match.group(1).strip() if category_match else None
+    
     # Remove YAML frontmatter (---...---)
     html = re.sub(r'^---\n.*?---\n', '', html, flags=re.DOTALL)
     
@@ -111,15 +115,16 @@ def markdown_to_html(md_text):
         p = re.sub(r'\n', ' ', blk)
         processed.append(f'<p>{p}</p>')
 
-    return '\n            \n            '.join(processed)
+    return '\n            \n            '.join(processed), category
 
-def create_essay_html(title, content, date="2026"):
+def create_essay_html(title, content, category=None, date="2026"):
     """Wrap content in the essay template."""
+    category_meta = f'\n    <meta name="category" content="{category}">' if category else ''
     return f'''<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">{category_meta}
     <title>{title} - Daksh Mehta</title>
     <style>
         body {{
@@ -279,10 +284,10 @@ def main():
             title = title_from_filename(md_file)
     
     # Convert to HTML
-    html_content = markdown_to_html(md_content)
+    html_content, category = markdown_to_html(md_content)
     
     # Create full HTML
-    full_html = create_essay_html(title, html_content)
+    full_html = create_essay_html(title, html_content, category=category)
     
     # Determine output filename
     script_dir = Path(__file__).parent

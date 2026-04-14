@@ -88,6 +88,11 @@
             <!-- Essays loaded dynamically from essays.json -->
         </ul>
         
+        <h2 id="misc-header" style="display: none; font-size: 16px; margin-top: 30px;">Miscellaneous</h2>
+        <ul id="misc-list" class="essay-list">
+            <!-- Misc loaded dynamically from essays.json -->
+        </ul>
+        
         <hr>
         
         <div class="footer">
@@ -101,6 +106,8 @@
                 const response = await fetch('essays.json');
                 const essays = await response.json();
                 const list = document.getElementById('essay-list');
+                const miscList = document.getElementById('misc-list');
+                const miscHeader = document.getElementById('misc-header');
                 
                 // Sort by date, newest first. Missing dates are treated as very old.
                 essays.sort((a, b) => (b.date || '0000-00').localeCompare(a.date || '0000-00'));
@@ -113,23 +120,33 @@
                     empty.textContent = 'No essays found.';
                     list.appendChild(empty);
                 } else {
-                essays.forEach(essay => {
-                    const li = document.createElement('li');
-                    const link = document.createElement('a');
-                    link.href = essay.url;
-                    link.textContent = essay.title;
-                    li.appendChild(link);
+                    let hasMisc = false;
+                    essays.forEach(essay => {
+                        const li = document.createElement('li');
+                        const link = document.createElement('a');
+                        link.href = essay.url;
+                        link.textContent = essay.title;
+                        li.appendChild(link);
+                        
+                        if (essay.date) {
+                            const [year, month] = essay.date.split('-');
+                            const dateSpan = document.createElement('span');
+                            dateSpan.className = 'essay-date';
+                            dateSpan.textContent = monthNames[parseInt(month) - 1] + ' ' + year;
+                            li.appendChild(dateSpan);
+                        }
+                        
+                        if (essay.category === 'miscellaneous') {
+                            hasMisc = true;
+                            miscList.appendChild(li);
+                        } else {
+                            list.appendChild(li);
+                        }
+                    });
                     
-                    if (essay.date) {
-                        const [year, month] = essay.date.split('-');
-                        const dateSpan = document.createElement('span');
-                        dateSpan.className = 'essay-date';
-                        dateSpan.textContent = monthNames[parseInt(month) - 1] + ' ' + year;
-                        li.appendChild(dateSpan);
+                    if (hasMisc) {
+                        miscHeader.style.display = 'block';
                     }
-                    
-                    list.appendChild(li);
-                });
                 }
             } catch (error) {
                 console.log('Could not load essays.json');
