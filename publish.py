@@ -117,6 +117,130 @@ def markdown_to_html(md_text):
 
     return '\n            \n            '.join(processed), category
 
+def latex_to_html(tex_text):
+    """Convert a simple subset of LaTeX to HTML."""
+    html = tex_text
+    
+    # Extract metadata using regex
+    title_match = re.search(r'\\title\{([^}]+)\}', html)
+    title = title_match.group(1).strip() if title_match else None
+    
+    date_match = re.search(r'\\date\{([^}]+)\}', html)
+    date = date_match.group(1).strip() if date_match else "2026"
+    
+    # Optional % category: data
+    category_match = re.search(r'%\s*category:\s*([^\n]+)', html, flags=re.IGNORECASE)
+    category = category_match.group(1).strip() if category_match else None
+    
+    # Extract body between \begin{document} and \end{document}
+    body_match = re.search(r'\\begin\{document\}(.*?)\\end\{document\}', html, flags=re.DOTALL)
+    if body_match:
+        html = body_match.group(1)
+    
+    # Remove \maketitle
+    html = re.sub(r'\\maketitle', '', html)
+    
+    # Convert headers
+    html = re.sub(r'\\section\*?\{([^}]+)\}', r'<h2>\1</h2>', html)
+    html = re.sub(r'\\subsection\*?\{([^}]+)\}', r'<h3>\1</h3>', html)
+    html = re.sub(r'\\subsubsection\*?\{([^}]+)\}', r'<h4>\1</h4>', html)
+    html = re.sub(r'\\paragraph\*?\{([^}]+)\}', r'<h5>\1</h5>', html)
+    
+    # Convert styling
+    html = re.sub(r'\\textbf\{([^}]+)\}', r'<strong>\1</strong>', html)
+    html = re.sub(r'\\textit\{([^}]+)\}', r'<em>\1</em>', html)
+    html = re.sub(r'\\emph\{([^}]+)\}', r'<em>\1</em>', html)
+    
+    # Check for figures and graphics
+    # We will convert \begin{figure}...\end{figure} containing \includegraphics to standard HTML <img>
+    def process_figure(match):
+        content = match.group(1)
+        src_match = re.search(r'\\includegraphics(?:\[.*?\])?\{([^}]+)\}', content)
+        caption_match = re.search(r'\\caption\{([^}]+)\}', content)
+        label_match = re.search(r'\\label\{([^}]+)\}', content)
+        
+        if not src_match:
+            return ""
+            
+        src = src_match.group(1)
+        caption = caption_match.group(1) if caption_match else ""
+        label = label_match.group(1) if label_match else ""
+        
+        img_id = f' id="{label}"' if label else ""
+        
+        return f'<figure{img_id} style="text-align: center;">\n<img src="../files/{Path(src).name}" alt="{caption}" style="max-width: 100%; height: auto;">\n<figcaption><em>{caption}</em></figcaption>\n</figure>'
+
+    html = re.sub(r'\\begin\{figure\}.*?(.*?)\\end\{figure\}', process_figure, html, flags=re.DOTALL)
+    
+    # Basic ref conversion assuming href points to the label ID
+    html = re.sub(r'Figure \\ref\{([^}]+)\}', r'<a href="#\1">Figure</a>', html)
+
+    # Convert verbatim block to <code> block inside <pre>
+    html = re.sub(r'\\begin\{verbatim\}(.*?)\\end\{verbatim\}', r'<pre><code>\1</code></pre>', html, flags=re.DOTALL)
+
+    # Clean leftover \\\\ for paragraphs where we might want standard breaks
+    html = re.sub(r'\\\\\n?', '<br>\n', html)
+    
+    # Split into blocks based on double blank lines to process paragraphs and lists
+    blocks = re.split(r'\n\s*\n', html.strip())
+    
+    processed = []
+    in_list = False
+    list_tag = ''
+    
+    for blk in blocks:
+        blk = blk.strip()
+        if not blk: continue
+        
+        # Check if block is a heading or line break
+        if re.match(r'^<h[1-6]>', blk) or blk == '<br>':
+            processed.append(blk)
+            continue
+            
+        # Process lists line by line
+        lines = blk.split('\n')
+        new_lines = []
+        for line in lines:
+            if r'\begin{enumerate}' in line:
+                in_list = True
+                list_tag = 'ol'
+                new_lines.append('<ol>')
+                continue
+            elif r'\begin{itemize}' in line:
+                in_list = True
+                list_tag = 'ul'
+                new_lines.append('<ul>')
+                continue
+            elif r'\end{enumerate}' in line:
+                in_list = False
+                new_lines.append('</ol>')
+                continue
+            elif r'\end{itemize}' in line:
+                in_list = False
+                new_lines.append('</ul>')
+                continue
+                
+            if in_list and r'\item' in line:
+                item_content = re.sub(r'\\item\s*', '', line).strip()
+                new_lines.append(f'<li>{item_content}</li>')
+            elif in_list:
+                # continuation of list item
+                new_lines.append(line.strip())
+            else:
+                new_lines.append(line)
+                
+        if in_list:
+            processed.append('\n'.join(new_lines))
+        else:
+            # combine into paragraph if it's not wrapped in html tags
+            joined = ' '.join(new_lines).strip()
+            if joined.startswith('<') and not joined.startswith('<strong'):
+                processed.append(joined)
+            else:
+                processed.append(f'<p>{joined}</p>')
+                
+    return '\n'.join(processed), category, title, date
+
 def create_essay_html(title, content, category=None, date="2026"):
     """Wrap content in the essay template."""
     category_meta = f'\n    <meta name="category" content="{category}">' if category else ''
@@ -126,6 +250,17 @@ def create_essay_html(title, content, category=None, date="2026"):
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">{category_meta}
     <title>{title} - Daksh Mehta</title>
+    <!-- MathJax for rendering math -->
+    <script>
+      MathJax = {{
+        tex: {{
+          inlineMath: [['$', '$'], ['\\\\(', '\\\\)']],
+          displayMath: [['$$', '$$'], ['\\\\[', '\\\\]']]
+        }}
+      }};
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
         body {{
             font-family: Verdana, Geneva, sans-serif;
@@ -255,39 +390,47 @@ def filename_from_title(title):
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: ./publish.py <markdown-file> [title]")
+        print("Usage: ./publish.py <markdown-or-tex-file> [title]")
         print("Example: ./publish.py drafts/my-essay.md")
-        print("         ./publish.py drafts/my-essay.md \"My Custom Title\"")
+        print("         ./publish.py drafts/my-essay.tex \"My Custom Title\"")
         sys.exit(1)
     
-    md_file = sys.argv[1]
+    input_file = sys.argv[1]
     
-    if not os.path.exists(md_file):
-        print(f"Error: File '{md_file}' not found")
+    if not os.path.exists(input_file):
+        print(f"Error: File '{input_file}' not found")
         sys.exit(1)
     
-    # Read markdown
-    with open(md_file, 'r', encoding='utf-8') as f:
-        md_content = f.read()
+    # Read file
+    with open(input_file, 'r', encoding='utf-8') as f:
+        content = f.read()
     
-    # Get title (from argument or filename)
-    if len(sys.argv) >= 3:
-        title = sys.argv[2]
+    # Process based on extension
+    is_tex = input_file.endswith('.tex')
+    
+    if is_tex:
+        html_content, category, default_title, date = latex_to_html(content)
+        title = default_title or title_from_filename(input_file)
     else:
+        # Default markdown processing
+        date = "2026"  # default markdown date
         # Try to extract title from first # header
-        title_match = re.search(r'^# (.+)$', md_content, re.MULTILINE)
+        title_match = re.search(r'^# (.+)$', content, re.MULTILINE)
         if title_match:
             title = title_match.group(1)
             # Remove the title from content since we'll add it in template
-            md_content = re.sub(r'^# .+\n', '', md_content, count=1)
+            content = re.sub(r'^# .+\n', '', content, count=1)
         else:
-            title = title_from_filename(md_file)
+            title = title_from_filename(input_file)
+            
+        html_content, category = markdown_to_html(content)
     
-    # Convert to HTML
-    html_content, category = markdown_to_html(md_content)
-    
+    # Override title if provided as argument
+    if len(sys.argv) >= 3:
+        title = sys.argv[2]
+        
     # Create full HTML
-    full_html = create_essay_html(title, html_content, category=category)
+    full_html = create_essay_html(title, html_content, category=category, date=date)
     
     # Determine output filename
     script_dir = Path(__file__).parent

@@ -1,0 +1,11 @@
+{
+    "latex-workshop.latex.autoClean.run": "onBuilt",
+    "files.exclude": {
+        "**/*.aux": true,
+        "**/*.log": true,
+        "**/*.fls": true,
+        "**/*.fdb_latexmk": true,
+        "**/*.gz": true,
+        "**/*.out": true
+    }
+}

@@ -87,6 +87,11 @@
         <ul id="essay-list" class="essay-list">
             <!-- Essays loaded dynamically from essays.json -->
         </ul>
+
+        <h2 id="research-header" style="display: none; font-size: 16px; margin-top: 30px;">Research</h2>
+        <ul id="research-list" class="essay-list">
+            <!-- Research loaded dynamically from essays.json -->
+        </ul>
         
         <h2 id="misc-header" style="display: none; font-size: 16px; margin-top: 30px;">Miscellaneous</h2>
         <ul id="misc-list" class="essay-list">
@@ -106,6 +111,8 @@
                 const response = await fetch('essays.json');
                 const essays = await response.json();
                 const list = document.getElementById('essay-list');
+                const researchList = document.getElementById('research-list');
+                const researchHeader = document.getElementById('research-header');
                 const miscList = document.getElementById('misc-list');
                 const miscHeader = document.getElementById('misc-header');
                 
@@ -121,6 +128,8 @@
                     list.appendChild(empty);
                 } else {
                     let hasMisc = false;
+                    let hasResearch = false;
+                    
                     essays.forEach(essay => {
                         const li = document.createElement('li');
                         const link = document.createElement('a');
@@ -132,13 +141,17 @@
                             const [year, month] = essay.date.split('-');
                             const dateSpan = document.createElement('span');
                             dateSpan.className = 'essay-date';
-                            dateSpan.textContent = monthNames[parseInt(month) - 1] + ' ' + year;
+                            dateSpan.textContent = '- ' + monthNames[parseInt(month, 10) - 1] + ' ' + year;
                             li.appendChild(dateSpan);
                         }
                         
-                        if (essay.category === 'miscellaneous') {
+                        const cat = (essay.category || '').toLowerCase();
+                        if (cat === 'miscellaneous') {
                             hasMisc = true;
                             miscList.appendChild(li);
+                        } else if (cat === 'research') {
+                            hasResearch = true;
+                            researchList.appendChild(li);
                         } else {
                             list.appendChild(li);
                         }
@@ -146,6 +159,9 @@
                     
                     if (hasMisc) {
                         miscHeader.style.display = 'block';
+                    }
+                    if (hasResearch) {
+                        researchHeader.style.display = 'block';
                     }
                 }
             } catch (error) {
