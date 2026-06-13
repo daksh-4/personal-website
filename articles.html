@@ -14,95 +14,117 @@
             margin: 0;
             padding: 20px;
         }
-        
+
         .container {
             max-width: 600px;
             margin: 0 auto;
             padding: 20px;
         }
-        
+
         h1 {
             font-size: 18px;
             font-weight: bold;
             margin-bottom: 20px;
         }
-        
+
         a {
             color: #000;
             text-decoration: underline;
         }
-        
+
         a:hover {
             color: #666;
         }
-        
+
         .nav {
             margin-bottom: 30px;
         }
-        
+
         .nav a {
             margin-right: 15px;
         }
-        
+
         .essay-list {
             list-style: none;
             padding: 0;
         }
-        
+
         .essay-list li {
             margin-bottom: 12px;
         }
-        
+
         .essay-date {
             color: #666;
             font-size: 12px;
             margin-left: 10px;
         }
-        
+
         .footer {
             margin-top: 50px;
             font-size: 12px;
             color: #666;
         }
-        
+
         hr {
             border: none;
             border-top: 1px solid #ccc;
             margin: 20px 0;
         }
+
+        .view-btn {
+            background: #fff;
+            border: 1px solid #ccc;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 13px;
+            margin-right: 5px;
+        }
+        .view-btn:hover { background: #eee; }
+        .view-btn.active { background: #ddd; font-weight: bold; }
+
+        #graph-container {
+            display: none;
+            width: 100vw;
+            margin-left: calc(-50vw + 50%);
+            height: calc(100vh - 200px);
+        }
     </style>
+    <script src="https://unpkg.com/force-graph"></script>
 </head>
 <body>
     <div class="container">
         <h1>Essays</h1>
-        
+
         <div class="nav">
             <a href="index.html">Home</a>
             <a href="about.html">About</a>
             <a href="contact.html">Contact</a>
         </div>
-        
+
         <hr>
-        
+
+        <div style="margin-bottom: 20px;">
+            <button id="btn-list" class="view-btn active" onclick="toggleView('list')">List View</button>
+            <button id="btn-graph" class="view-btn" onclick="toggleView('graph')">Graph View</button>
+        </div>
+    </div>
+
+    <div id="graph-container"></div>
+
+    <div id="list-container" class="container">
         <ul id="essay-list" class="essay-list">
             <!-- Essays loaded dynamically from essays.json -->
         </ul>
 
         <h2 id="research-header" style="display: none; font-size: 16px; margin-top: 30px;">Research</h2>
-        <ul id="research-list" class="essay-list">
-            <!-- Research loaded dynamically from essays.json -->
-        </ul>
-        
+        <ul id="research-list" class="essay-list"></ul>
+
         <h2 id="misc-header" style="display: none; font-size: 16px; margin-top: 30px;">Miscellaneous</h2>
-        <ul id="misc-list" class="essay-list">
-            <!-- Misc loaded dynamically from essays.json -->
-        </ul>
-        
+        <ul id="misc-list" class="essay-list"></ul>
+
         <hr>
-        
-        <div class="footer">
-            &copy; 2026 Daksh Mehta
-        </div>
+        <div class="footer">&copy; 2026 Daksh Mehta</div>
     </div>
 
     <script>
@@ -115,13 +137,14 @@
                 const researchHeader = document.getElementById('research-header');
                 const miscList = document.getElementById('misc-list');
                 const miscHeader = document.getElementById('misc-header');
-                
-                // Sort by date, newest first. Missing dates are treated as very old.
+
                 essays.sort((a, b) => (b.date || '0000-00').localeCompare(a.date || '0000-00'));
-                
-                const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+
+                const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
                                    'July', 'August', 'September', 'October', 'November', 'December'];
-                
+
+                buildGraph(essays);
+
                 if (!essays || essays.length === 0) {
                     const empty = document.createElement('li');
                     empty.textContent = 'No essays found.';
@@ -129,14 +152,14 @@
                 } else {
                     let hasMisc = false;
                     let hasResearch = false;
-                    
+
                     essays.forEach(essay => {
                         const li = document.createElement('li');
                         const link = document.createElement('a');
                         link.href = essay.url;
                         link.textContent = essay.title;
                         li.appendChild(link);
-                        
+
                         if (essay.date) {
                             const [year, month] = essay.date.split('-');
                             const dateSpan = document.createElement('span');
@@ -144,7 +167,7 @@
                             dateSpan.textContent = '- ' + monthNames[parseInt(month, 10) - 1] + ' ' + year;
                             li.appendChild(dateSpan);
                         }
-                        
+
                         const cat = (essay.category || '').toLowerCase();
                         if (cat === 'miscellaneous') {
                             hasMisc = true;
@@ -156,20 +179,95 @@
                             list.appendChild(li);
                         }
                     });
-                    
-                    if (hasMisc) {
-                        miscHeader.style.display = 'block';
-                    }
-                    if (hasResearch) {
-                        researchHeader.style.display = 'block';
-                    }
+
+                    if (hasMisc) miscHeader.style.display = 'block';
+                    if (hasResearch) researchHeader.style.display = 'block';
                 }
             } catch (error) {
                 console.log('Could not load essays.json');
             }
         }
-        
+
         loadEssays();
+
+        let myGraph = null;
+
+        function toggleView(view) {
+            document.getElementById('btn-list').classList.toggle('active', view === 'list');
+            document.getElementById('btn-graph').classList.toggle('active', view === 'graph');
+            document.getElementById('list-container').style.display = (view === 'list') ? 'block' : 'none';
+            document.getElementById('graph-container').style.display = (view === 'graph') ? 'block' : 'none';
+
+            if (view === 'graph' && myGraph !== null) {
+                const gc = document.getElementById('graph-container');
+                myGraph.width(gc.clientWidth).height(gc.clientHeight);
+                setTimeout(() => myGraph.zoomToFit(400, 80), 50);
+            }
+        }
+
+        function buildGraph(essays) {
+            const coreNodes = ['tools', 'work', 'reflections'];
+            const nodes = coreNodes.map(id => ({ id, name: id, group: 'core', val: 8 }));
+            const links = [];
+
+            essays.forEach(essay => {
+                if (!essay.nodes || essay.nodes.length === 0) return;
+                nodes.push({
+                    id: essay.url,
+                    name: essay.title,
+                    group: 'essay',
+                    val: 2,
+                    url: essay.url
+                });
+                essay.nodes.forEach(centralNode => {
+                    links.push({ source: essay.url, target: centralNode });
+                });
+            });
+
+            const gc = document.getElementById('graph-container');
+            const W = window.innerWidth;
+            const H = window.innerHeight - 200;
+
+            myGraph = ForceGraph()(document.getElementById('graph-container'))
+                .width(W)
+                .height(H)
+                .backgroundColor('#f6f6ef')
+                .graphData({ nodes, links })
+                .nodeId('id')
+                .nodeVal('val')
+                .nodeLabel('name')
+                .nodeAutoColorBy('group')
+                .nodeCanvasObject((node, ctx, globalScale) => {
+                    const label = node.name || node.id;
+                    const fontSize = node.group === 'core' ? 14 / globalScale : 11 / globalScale;
+                    ctx.font = `${node.group === 'core' ? 'bold ' : ''}${fontSize}px Verdana, sans-serif`;
+                    const textWidth = ctx.measureText(label).width;
+                    const r = node.group === 'core' ? 6 : 3;
+
+                    ctx.beginPath();
+                    ctx.arc(node.x, node.y, r, 0, 2 * Math.PI, false);
+                    ctx.fillStyle = node.group === 'core' ? '#333' : '#888';
+                    ctx.fill();
+
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = '#000';
+                    ctx.fillText(label, node.x, node.y + r + fontSize * 0.8);
+                })
+                .nodePointerAreaPaint((node, color, ctx) => {
+                    const r = node.group === 'core' ? 8 : 5;
+                    ctx.beginPath();
+                    ctx.arc(node.x, node.y, r + 8, 0, 2 * Math.PI, false);
+                    ctx.fillStyle = color;
+                    ctx.fill();
+                })
+                .linkColor(() => '#ccc')
+                .linkDirectionalParticles(2)
+                .linkDirectionalParticleSpeed(0.005)
+                .onNodeClick(node => {
+                    if (node.url) window.location.href = node.url;
+                });
+        }
     </script>
     <script data-goatcounter="https://daksh-4.goatcounter.com/count"
             async src="//gc.zgo.at/count.js"></script>
