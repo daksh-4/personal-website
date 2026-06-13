@@ -32,7 +32,7 @@ def get_frontmatter(text, is_tex=False):
             if m: date = m.group(1).strip()
 
             m = re.search(r'^%[ \t]*nodes:[ \t]*(.+)$', fm, flags=re.MULTILINE)
-            if m: nodes = [n.strip() for n in m.group(1).split(',')]
+            if m: nodes = [n.strip().title() for n in m.group(1).split(',')]
 
             m = re.search(r'^%[ \t]*links:[ \t]*(.+)$', fm, flags=re.MULTILINE)
             if m: links = [l.strip() for l in m.group(1).split(',')]
