@@ -3,49 +3,71 @@
         "title": "The Acute Neurology Unit",
         "url": "essays/acute-neurology-unit.html",
         "date": "2025-05",
-        "nodes": ["Reflections"]
+        "nodes": [
+            "Reflections"
+        ]
     },
     {
         "title": "Bennett Medicines Symposium",
         "url": "essays/bennett-medicines-symposium.html",
         "date": "2025-12",
-        "nodes": ["Reflections", "Work"]
+        "nodes": [
+            "Reflections",
+            "Work"
+        ]
     },
     {
         "title": "Efficient Coding",
         "url": "essays/efficient-coding.html",
         "date": "2026-02",
-        "nodes": ["Work"]
+        "nodes": [
+            "Work"
+        ]
     },
     {
         "title": "Gatsby Bridging Programme",
         "url": "essays/gatsby-bridging-programme.html",
         "date": "2025-08",
-        "nodes": ["Reflections"]
+        "nodes": [
+            "Reflections"
+        ]
     },
     {
         "title": "Proust and Neuroscience",
         "url": "essays/proust-and-neuroscience.html",
         "date": "2026-04",
-        "nodes": ["Reading"]
+        "nodes": [
+            "Reading"
+        ]
     },
     {
         "title": "Research Skills Workshop",
         "url": "essays/research-skills-workshop.html",
         "date": "2026-02",
-        "nodes": ["Tools"]
+        "nodes": [
+            "Tools"
+        ]
     },
     {
         "title": "Tikhonov Corrections",
         "url": "essays/tikhonov-corrections.html",
         "date": "2026-05",
-        "nodes": ["Work"],
-        "links": ["essays/efficient-coding.html"]
+        "nodes": [
+            "Work"
+        ],
+        "links": [
+            "essays/efficient-coding.html"
+        ]
     },
     {
         "title": "Sharing Work Online",
         "url": "essays/sharing-work-online.html",
         "date": "2026-06",
-        "nodes": ["Reflections", "Reading"]
+        "category": "",
+        "nodes": [
+            "reflections",
+            "reading"
+        ],
+        "links": []
     }
 ]
