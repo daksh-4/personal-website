@@ -91,6 +91,75 @@
         }
     </style>
     <script src="https://unpkg.com/force-graph"></script>
+    <!-- ESSAYS-DATA-START -->
+    <script id="essays-data">
+    window.ESSAYS_DATA = [
+    {
+        "title": "The Acute Neurology Unit",
+        "url": "essays/acute-neurology-unit.html",
+        "date": "2025-05",
+        "nodes": [
+            "reflections"
+        ]
+    },
+    {
+        "title": "Bennett Medicines Symposium",
+        "url": "essays/bennett-medicines-symposium.html",
+        "date": "2025-12",
+        "nodes": [
+            "reflections",
+            "work"
+        ]
+    },
+    {
+        "title": "Efficient Coding",
+        "url": "essays/efficient-coding.html",
+        "date": "2026-02",
+        "category": "Research",
+        "nodes": [
+            "work"
+        ]
+    },
+    {
+        "title": "Gatsby Bridging Programme",
+        "url": "essays/gatsby-bridging-programme.html",
+        "date": "2025-08",
+        "nodes": [
+            "reflections"
+        ]
+    },
+    {
+        "title": "Proust and Neuroscience",
+        "url": "essays/proust-and-neuroscience.html",
+        "date": "2026-04",
+        "category": "miscellaneous",
+        "nodes": [
+            "reading"
+        ]
+    },
+    {
+        "title": "Research Skills Workshop",
+        "url": "essays/research-skills-workshop.html",
+        "date": "2026-02",
+        "nodes": [
+            "tools"
+        ]
+    },
+    {
+        "title": "Tikhonov Corrections",
+        "url": "essays/tikhonov-corrections.html",
+        "date": "2026-05",
+        "category": "Research",
+        "nodes": [
+            "work"
+        ],
+        "links": [
+            "essays/efficient-coding.html"
+        ]
+    }
+];
+    </script>
+    <!-- ESSAYS-DATA-END -->
 </head>
 <body>
     <div class="container">
@@ -129,63 +198,69 @@
 
     <script>
         async function loadEssays() {
+            let essays = [];
             try {
-                const response = await fetch('essays.json');
-                const essays = await response.json();
-                const list = document.getElementById('essay-list');
-                const researchList = document.getElementById('research-list');
-                const researchHeader = document.getElementById('research-header');
-                const miscList = document.getElementById('misc-list');
-                const miscHeader = document.getElementById('misc-header');
-
-                essays.sort((a, b) => (b.date || '0000-00').localeCompare(a.date || '0000-00'));
-
-                const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                                   'July', 'August', 'September', 'October', 'November', 'December'];
-
-                buildGraph(essays);
-
-                if (!essays || essays.length === 0) {
-                    const empty = document.createElement('li');
-                    empty.textContent = 'No essays found.';
-                    list.appendChild(empty);
+                if (window.ESSAYS_DATA) {
+                    essays = window.ESSAYS_DATA;
                 } else {
-                    let hasMisc = false;
-                    let hasResearch = false;
-
-                    essays.forEach(essay => {
-                        const li = document.createElement('li');
-                        const link = document.createElement('a');
-                        link.href = essay.url;
-                        link.textContent = essay.title;
-                        li.appendChild(link);
-
-                        if (essay.date) {
-                            const [year, month] = essay.date.split('-');
-                            const dateSpan = document.createElement('span');
-                            dateSpan.className = 'essay-date';
-                            dateSpan.textContent = '- ' + monthNames[parseInt(month, 10) - 1] + ' ' + year;
-                            li.appendChild(dateSpan);
-                        }
-
-                        const cat = (essay.category || '').toLowerCase();
-                        if (cat === 'miscellaneous') {
-                            hasMisc = true;
-                            miscList.appendChild(li);
-                        } else if (cat === 'research') {
-                            hasResearch = true;
-                            researchList.appendChild(li);
-                        } else {
-                            list.appendChild(li);
-                        }
-                    });
-
-                    if (hasMisc) miscHeader.style.display = 'block';
-                    if (hasResearch) researchHeader.style.display = 'block';
+                    const response = await fetch('essays.json');
+                    essays = await response.json();
                 }
             } catch (error) {
-                console.log('Could not load essays.json');
+                console.log('Could not load essays:', error);
             }
+
+            const list = document.getElementById('essay-list');
+            const researchList = document.getElementById('research-list');
+            const researchHeader = document.getElementById('research-header');
+            const miscList = document.getElementById('misc-list');
+            const miscHeader = document.getElementById('misc-header');
+
+            essays.sort((a, b) => (b.date || '0000-00').localeCompare(a.date || '0000-00'));
+
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                               'July', 'August', 'September', 'October', 'November', 'December'];
+
+            if (essays.length === 0) {
+                const empty = document.createElement('li');
+                empty.textContent = 'No essays found.';
+                list.appendChild(empty);
+            } else {
+                let hasMisc = false;
+                let hasResearch = false;
+
+                essays.forEach(essay => {
+                    const li = document.createElement('li');
+                    const link = document.createElement('a');
+                    link.href = essay.url;
+                    link.textContent = essay.title;
+                    li.appendChild(link);
+
+                    if (essay.date) {
+                        const [year, month] = essay.date.split('-');
+                        const dateSpan = document.createElement('span');
+                        dateSpan.className = 'essay-date';
+                        dateSpan.textContent = '- ' + monthNames[parseInt(month, 10) - 1] + ' ' + year;
+                        li.appendChild(dateSpan);
+                    }
+
+                    const cat = (essay.category || '').toLowerCase();
+                    if (cat === 'miscellaneous') {
+                        hasMisc = true;
+                        miscList.appendChild(li);
+                    } else if (cat === 'research') {
+                        hasResearch = true;
+                        researchList.appendChild(li);
+                    } else {
+                        list.appendChild(li);
+                    }
+                });
+
+                if (hasMisc) miscHeader.style.display = 'block';
+                if (hasResearch) researchHeader.style.display = 'block';
+            }
+
+            window._essaysForGraph = essays;
         }
 
         loadEssays();
@@ -198,15 +273,20 @@
             document.getElementById('list-container').style.display = (view === 'list') ? 'block' : 'none';
             document.getElementById('graph-container').style.display = (view === 'graph') ? 'block' : 'none';
 
-            if (view === 'graph' && myGraph !== null) {
+            if (view === 'graph') {
                 const gc = document.getElementById('graph-container');
-                myGraph.width(gc.clientWidth).height(gc.clientHeight);
-                setTimeout(() => myGraph.zoomToFit(400, 80), 50);
+                if (myGraph === null) {
+                    try { buildGraph(window._essaysForGraph || []); } catch(e) { console.log('Graph error:', e); }
+                }
+                if (myGraph !== null) {
+                    myGraph.width(gc.clientWidth).height(gc.clientHeight);
+                    setTimeout(() => myGraph.zoomToFit(400, 80), 50);
+                }
             }
         }
 
         function buildGraph(essays) {
-            const coreNodes = ['tools', 'work', 'reflections'];
+            const coreNodes = ['tools', 'work', 'reflections', 'reading'];
             const nodes = coreNodes.map(id => ({ id, name: id, group: 'core', val: 8 }));
             const links = [];
 
@@ -221,6 +301,9 @@
                 });
                 essay.nodes.forEach(centralNode => {
                     links.push({ source: essay.url, target: centralNode });
+                });
+                (essay.links || []).forEach(linkedUrl => {
+                    links.push({ source: essay.url, target: linkedUrl });
                 });
             });
 
