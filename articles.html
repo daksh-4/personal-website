@@ -99,7 +99,7 @@
         "url": "essays/acute-neurology-unit.html",
         "date": "2025-05",
         "nodes": [
-            "reflections"
+            "Reflections"
         ]
     },
     {
@@ -107,17 +107,16 @@
         "url": "essays/bennett-medicines-symposium.html",
         "date": "2025-12",
         "nodes": [
-            "reflections",
-            "work"
+            "Reflections",
+            "Work"
         ]
     },
     {
         "title": "Efficient Coding",
         "url": "essays/efficient-coding.html",
         "date": "2026-02",
-        "category": "Research",
         "nodes": [
-            "work"
+            "Work"
         ]
     },
     {
@@ -125,16 +124,15 @@
         "url": "essays/gatsby-bridging-programme.html",
         "date": "2025-08",
         "nodes": [
-            "reflections"
+            "Reflections"
         ]
     },
     {
         "title": "Proust and Neuroscience",
         "url": "essays/proust-and-neuroscience.html",
         "date": "2026-04",
-        "category": "miscellaneous",
         "nodes": [
-            "reading"
+            "Reading"
         ]
     },
     {
@@ -142,19 +140,27 @@
         "url": "essays/research-skills-workshop.html",
         "date": "2026-02",
         "nodes": [
-            "tools"
+            "Tools"
         ]
     },
     {
         "title": "Tikhonov Corrections",
         "url": "essays/tikhonov-corrections.html",
         "date": "2026-05",
-        "category": "Research",
         "nodes": [
-            "work"
+            "Work"
         ],
         "links": [
             "essays/efficient-coding.html"
+        ]
+    },
+    {
+        "title": "Sharing Work Online",
+        "url": "essays/sharing-work-online.html",
+        "date": "2026-06",
+        "nodes": [
+            "Reflections",
+            "Reading"
         ]
     }
 ];
@@ -182,16 +188,7 @@
     <div id="graph-container"></div>
 
     <div id="list-container" class="container">
-        <ul id="essay-list" class="essay-list">
-            <!-- Essays loaded dynamically from essays.json -->
-        </ul>
-
-        <h2 id="research-header" style="display: none; font-size: 16px; margin-top: 30px;">Research</h2>
-        <ul id="research-list" class="essay-list"></ul>
-
-        <h2 id="misc-header" style="display: none; font-size: 16px; margin-top: 30px;">Miscellaneous</h2>
-        <ul id="misc-list" class="essay-list"></ul>
-
+        <ul id="essay-list" class="essay-list"></ul>
         <hr>
         <div class="footer">&copy; 2026 Daksh Mehta</div>
     </div>
@@ -211,10 +208,6 @@
             }
 
             const list = document.getElementById('essay-list');
-            const researchList = document.getElementById('research-list');
-            const researchHeader = document.getElementById('research-header');
-            const miscList = document.getElementById('misc-list');
-            const miscHeader = document.getElementById('misc-header');
 
             essays.sort((a, b) => (b.date || '0000-00').localeCompare(a.date || '0000-00'));
 
@@ -226,9 +219,6 @@
                 empty.textContent = 'No essays found.';
                 list.appendChild(empty);
             } else {
-                let hasMisc = false;
-                let hasResearch = false;
-
                 essays.forEach(essay => {
                     const li = document.createElement('li');
                     const link = document.createElement('a');
@@ -244,20 +234,8 @@
                         li.appendChild(dateSpan);
                     }
 
-                    const cat = (essay.category || '').toLowerCase();
-                    if (cat === 'miscellaneous') {
-                        hasMisc = true;
-                        miscList.appendChild(li);
-                    } else if (cat === 'research') {
-                        hasResearch = true;
-                        researchList.appendChild(li);
-                    } else {
-                        list.appendChild(li);
-                    }
+                    list.appendChild(li);
                 });
-
-                if (hasMisc) miscHeader.style.display = 'block';
-                if (hasResearch) researchHeader.style.display = 'block';
             }
 
             window._essaysForGraph = essays;
@@ -286,7 +264,7 @@
         }
 
         function buildGraph(essays) {
-            const coreNodes = ['tools', 'work', 'reflections', 'reading'];
+            const coreNodes = ['Tools', 'Work', 'Reflections', 'Reading'];
             const nodes = coreNodes.map(id => ({ id, name: id, group: 'core', val: 8 }));
             const links = [];
 
