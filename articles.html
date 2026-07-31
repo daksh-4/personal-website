@@ -294,7 +294,6 @@
                 }
                 if (myGraph !== null) {
                     myGraph.width(gc.clientWidth).height(gc.clientHeight);
-                    setTimeout(() => myGraph.zoomToFit(400, 80), 50);
                 }
             }
         }
@@ -365,8 +364,16 @@
                     if (node.url) window.location.href = node.url;
                 });
 
-            myGraph.d3Force('link').strength(0.8);
+            myGraph.d3Force('link').strength(0.6);
             myGraph.d3Force('charge').strength(-120);
+
+            let initialZoomDone = false;
+            myGraph.onEngineStop(() => {
+                if (!initialZoomDone) {
+                    initialZoomDone = true;
+                    myGraph.zoomToFit(600, 60);
+                }
+            });
         }
     </script>
     <script data-goatcounter="https://daksh-4.goatcounter.com/count"
