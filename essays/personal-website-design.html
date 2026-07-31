@@ -94,8 +94,8 @@ limit.
 % ---
 </pre>
 <!-- l. 39 --><p class='nopar'>
-</p><!-- l. 41 --><p class='noindent'>This frontmatter is how essays get tagged and connected to each other, which matters for both the graph view
-and the version history described below.
+</p><!-- l. 41 --><p class='noindent'>This frontmatter is how essays get tagged and connected to each other, which matters for the graph view and
+the version history described below.
    
 </p>
    <h3 class='likesectionHead' id='the-build-pipeline'><a id='x1-2000'></a>The Build Pipeline</h3>
@@ -109,32 +109,31 @@ a local file, without needing a web server.
    
 </p>
    <h3 class='likesectionHead' id='graph-view'><a id='x1-3000'></a>Graph View</h3>
-<!-- l. 49 --><p class='noindent'>As I write, I tag my essays with one or more of four core themes — Tools, Work, Reflections, and
-Reading — and sometimes link them directly to each other. The network of connections can be
-explored in the Graph View on the Essays tab. This is an unabashed copy of  <a href='https://obsidian.md'>Obsidian’s</a> graph view,
-which I have been using for the past three years and highly recommend. The pipeline compiles
-essay metadata into a single JSON file, which is then read by  <a href='https://github.com/vasturiano/force-graph'>force-graph</a> to render an interactive
-force-directed network. Essays cluster around their themes, and edges connect related pieces of
-writing.
+<!-- l. 49 --><p class='noindent'>As I write, I tag my essays with one or more of four core themes (Tools, Work, Reflections, and Reading) and
+sometimes link them directly to each other. The network of connections can be explored in the Graph View on
+the Essays tab. This is an unabashed copy of  <a href='https://obsidian.md'>Obsidian’s</a> graph view, which I have been using for the past three
+years and highly recommend. The pipeline compiles essay metadata into a single JSON file, which is then read
+by  <a href='https://github.com/vasturiano/force-graph'>force-graph</a> to render an interactive force-directed network. Essays cluster around their themes, and edges
+connect related pieces of writing.
    
 </p>
    <h3 class='likesectionHead' id='version-history'><a id='x1-4000'></a>Version History</h3>
 <!-- l. 52 --><p class='noindent'>Some essays evolve significantly after their first publication. To make this visible to readers, each essay has a
-version history slider that appears just above the text when there is something to compare. Dragging the
-slider left reveals an earlier draft; releasing it fades the content out and replaces it with the old
+version history slider that appears just above the text when there is something to compare. Dragging the slider
+left reveals an earlier draft, and releasing it fades the content out and replaces it with the old
 version.
 </p><!-- l. 54 --><p class='indent'>   The mechanism is lightweight and requires no backend. Every meaningful revision is committed to git with a
-message beginning <span class='cmtt-10'>publish: </span>— for example, <span class='cmtt-10'>publish: rewrote the opening section</span>. When a reader opens
-an essay, a small JavaScript block quietly queries the  <a href='https://docs.github.com/en/rest'>GitHub API</a> for the commit history of that specific file,
+message beginning <span class='cmtt-10'>publish:</span>, for example <span class='cmtt-10'>publish: rewrote the opening section</span>. When a reader opens an
+essay, a small JavaScript block quietly queries the  <a href='https://docs.github.com/en/rest'>GitHub API</a> for the commit history of that specific file,
 filters to commits with this prefix, and builds the slider from them. Fetching the actual content of an old
 version is done on demand by pulling the raw HTML from GitHub at the relevant commit hash,
 parsing it, and swapping in the body. The results are cached in memory so subsequent moves are
 instant.
-                                                                                      
-                                                                                      
-</p><!-- l. 56 --><p class='indent'>   Commits that do not carry the <span class='cmtt-10'>publish: </span>prefix — typo fixes, formatting tweaks — are invisible to the
+</p><!-- l. 56 --><p class='indent'>   Commits that do not carry the <span class='cmtt-10'>publish: </span>prefix (typo fixes, formatting tweaks) are invisible to the
 slider. This keeps the version history intentional: it surfaces genuine drafts rather than every small
 edit.
+                                                                                      
+                                                                                      
    
 </p>
    <h3 class='likesectionHead' id='hosting-and-analytics'><a id='x1-5000'></a>Hosting and Analytics</h3>

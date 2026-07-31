@@ -38,7 +38,7 @@ Each \texttt{.tex} file begins with a short block of metadata comments that the 
 % ---
 \end{verbatim}
 
-\noindent This frontmatter is how essays get tagged and connected to each other, which matters for both the graph view and the version history described below.
+\noindent This frontmatter is how essays get tagged and connected to each other, which matters for the graph view and the version history described below.
 
 \section*{The Build Pipeline}
 To get raw \texttt{.tex} files onto the web, I run a single Python script: \texttt{python3 publish.py drafts/my-essay.tex}. This triggers \texttt{make4ht}, a compiler that translates LaTeX syntax into HTML. The script then injects this content into a styled HTML template, which provides minimal CSS and calls MathJax to render any mathematical notation.
@@ -46,14 +46,14 @@ To get raw \texttt{.tex} files onto the web, I run a single Python script: \text
 The script also reads the frontmatter metadata and updates a central \texttt{essays.json} file that tracks every essay. This JSON is then embedded directly into \texttt{articles.html} so the essays page works even when opened as a local file, without needing a web server.
 
 \section*{Graph View}
-As I write, I tag my essays with one or more of four core themes --- Tools, Work, Reflections, and Reading --- and sometimes link them directly to each other. The network of connections can be explored in the Graph View on the Essays tab. This is an unabashed copy of \href{https://obsidian.md}{Obsidian's} graph view, which I have been using for the past three years and highly recommend. The pipeline compiles essay metadata into a single JSON file, which is then read by \href{https://github.com/vasturiano/force-graph}{force-graph} to render an interactive force-directed network. Essays cluster around their themes, and edges connect related pieces of writing.
+As I write, I tag my essays with one or more of four core themes (Tools, Work, Reflections, and Reading) and sometimes link them directly to each other. The network of connections can be explored in the Graph View on the Essays tab. This is an unabashed copy of \href{https://obsidian.md}{Obsidian's} graph view, which I have been using for the past three years and highly recommend. The pipeline compiles essay metadata into a single JSON file, which is then read by \href{https://github.com/vasturiano/force-graph}{force-graph} to render an interactive force-directed network. Essays cluster around their themes, and edges connect related pieces of writing.
 
 \section*{Version History}
-Some essays evolve significantly after their first publication. To make this visible to readers, each essay has a version history slider that appears just above the text when there is something to compare. Dragging the slider left reveals an earlier draft; releasing it fades the content out and replaces it with the old version.
+Some essays evolve significantly after their first publication. To make this visible to readers, each essay has a version history slider that appears just above the text when there is something to compare. Dragging the slider left reveals an earlier draft, and releasing it fades the content out and replaces it with the old version.
 
-The mechanism is lightweight and requires no backend. Every meaningful revision is committed to git with a message beginning \texttt{publish:} --- for example, \texttt{publish: rewrote the opening section}. When a reader opens an essay, a small JavaScript block quietly queries the \href{https://docs.github.com/en/rest}{GitHub API} for the commit history of that specific file, filters to commits with this prefix, and builds the slider from them. Fetching the actual content of an old version is done on demand by pulling the raw HTML from GitHub at the relevant commit hash, parsing it, and swapping in the body. The results are cached in memory so subsequent moves are instant.
+The mechanism is lightweight and requires no backend. Every meaningful revision is committed to git with a message beginning \texttt{publish:}, for example \texttt{publish: rewrote the opening section}. When a reader opens an essay, a small JavaScript block quietly queries the \href{https://docs.github.com/en/rest}{GitHub API} for the commit history of that specific file, filters to commits with this prefix, and builds the slider from them. Fetching the actual content of an old version is done on demand by pulling the raw HTML from GitHub at the relevant commit hash, parsing it, and swapping in the body. The results are cached in memory so subsequent moves are instant.
 
-Commits that do not carry the \texttt{publish:} prefix --- typo fixes, formatting tweaks --- are invisible to the slider. This keeps the version history intentional: it surfaces genuine drafts rather than every small edit.
+Commits that do not carry the \texttt{publish:} prefix (typo fixes, formatting tweaks) are invisible to the slider. This keeps the version history intentional: it surfaces genuine drafts rather than every small edit.
 
 \section*{Hosting and Analytics}
 Because the pipeline outputs plain, static HTML, the website requires virtually no computing power to run. There are no databases to query or servers to maintain. I host the site through Porkbun with the files served via GitHub Pages.
