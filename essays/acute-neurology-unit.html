@@ -73,6 +73,18 @@
             border-top: 1px solid #ccc;
             margin: 20px 0;
         }
+        .content { transition: opacity 0.15s ease; }
+        #version-bar { margin-bottom: 30px; display: none; }
+        #version-bar input[type=range] {
+            width: 100%;
+            margin: 0 0 6px 0;
+            accent-color: #333;
+            cursor: pointer;
+        }
+        #version-label {
+            font-size: 11px;
+            color: #888;
+        }
     </style>
 </head>
 <body>
@@ -124,5 +136,98 @@
     </div>
     <script data-goatcounter="https://daksh-4.goatcounter.com/count"
             async src="//gc.zgo.at/count.js"></script>
+    <script>
+    (async function () {
+        const repo = 'daksh-4/personal-website';
+        const filename = window.location.pathname.split('/').pop() || '';
+        if (!filename) return;
+        const filePath = 'essays/' + filename;
+        const cacheKey = 'vc_' + filename;
+
+        let commits;
+        try {
+            const cached = sessionStorage.getItem(cacheKey);
+            if (cached) {
+                commits = JSON.parse(cached);
+            } else {
+                const res = await fetch(
+                    `https://api.github.com/repos/${repo}/commits?path=${filePath}&per_page=100`
+                );
+                if (!res.ok) return;
+                commits = await res.json();
+                sessionStorage.setItem(cacheKey, JSON.stringify(commits));
+            }
+        } catch (e) { return; }
+
+        const versions = commits
+            .filter(c => /^publish:/i.test(c.commit.message.trim()))
+            .reverse();
+
+        if (versions.length === 0) return;
+
+        const bar = document.getElementById('version-bar');
+        const slider = document.getElementById('version-slider');
+        const label = document.getElementById('version-label');
+        const contentEl = document.querySelector('.content');
+        const currentHTML = contentEl.innerHTML;
+        const cache = {};
+        let activePos = versions.length;
+
+        slider.max = versions.length;
+        slider.value = versions.length;
+
+        function fmtDate(iso) {
+            return new Date(iso).toLocaleDateString('en-GB', {
+                year: 'numeric', month: 'long', day: 'numeric'
+            });
+        }
+
+        function setLabel(pos) {
+            if (pos === versions.length) {
+                label.textContent = 'Current version';
+            } else {
+                const v = versions[pos];
+                const msg = v.commit.message.trim().replace(/^publish:\s*/i, '');
+                label.textContent = fmtDate(v.commit.author.date) + (msg ? ' — ' + msg : '');
+            }
+        }
+
+        setLabel(versions.length);
+        bar.style.display = 'block';
+
+        slider.addEventListener('input', () => setLabel(parseInt(slider.value)));
+
+        slider.addEventListener('change', async () => {
+            const pos = parseInt(slider.value);
+            if (pos === activePos) return;
+
+            contentEl.style.opacity = '0';
+            await new Promise(r => setTimeout(r, 150));
+
+            if (pos === versions.length) {
+                contentEl.innerHTML = currentHTML;
+            } else {
+                const sha = versions[pos].sha;
+                if (!cache[sha]) {
+                    try {
+                        const r = await fetch(
+                            `https://raw.githubusercontent.com/${repo}/${sha}/${filePath}`
+                        );
+                        const text = await r.text();
+                        const doc = new DOMParser().parseFromString(text, 'text/html');
+                        const old = doc.querySelector('.content');
+                        cache[sha] = old ? old.innerHTML : '<p><em>Version unavailable.</em></p>';
+                    } catch (e) {
+                        cache[sha] = '<p><em>Version unavailable.</em></p>';
+                    }
+                }
+                contentEl.innerHTML = cache[sha];
+            }
+
+            activePos = pos;
+            contentEl.style.opacity = '1';
+        });
+    })();
+    </script>
 </body>
 </html>
