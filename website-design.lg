@@ -1,3 +1,4 @@
+htfcss: cmtt font-family: monospace,monospace;
 File: website-design.html
 File: website-design.css
 File: website-design.tmp
@@ -157,3 +158,4 @@ Css: div.gather-star {text-align:center;}
 Css: .rotatebox{display: inline-block;}
 --- characters ---
 Font("cmr","10","10","100")
+Font("cmtt","10","10","100")
