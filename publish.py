@@ -35,7 +35,13 @@ def get_frontmatter(text, is_tex=False):
             if m: nodes = [n.strip().title() for n in m.group(1).split(',')]
 
             m = re.search(r'^%[ \t]*links:[ \t]*(.+)$', fm, flags=re.MULTILINE)
-            if m: links = [l.strip() for l in m.group(1).split(',')]
+            if m:
+                def normalize_link(l):
+                    l = l.strip()
+                    if l and '/' not in l and not l.endswith('.html'):
+                        return f'essays/{l}.html'
+                    return l
+                links = [normalize_link(l) for l in m.group(1).split(',') if l.strip()]
 
             m = re.search(r'^%[ \t]*category:[ \t]*(.+)$', fm, flags=re.MULTILINE)
             if m: category = m.group(1).strip() or None
