@@ -32,7 +32,7 @@
         h3 { font-size: 16px; }
         a { color: #000; text-decoration: underline; }
         a:hover { color: #666; }
-        .date { color: #666; font-size: 12px; margin-bottom: 30px; }
+        .date { color: #666; font-size: 12px; margin-bottom: 20px; }
         .footer { margin-top: 50px; font-size: 12px; color: #666; border-top: 1px solid #ccc; padding-top: 20px; }
         .nav { margin-bottom: 30px; }
         .nav a { margin-right: 15px; }
@@ -56,9 +56,9 @@
         <a href="../articles.html">Essays</a>
         <a href="../about.html">About</a>
     </div>
-    
+
     <h1>Personal Website Design</h1>
-    <div class="date">2026-06</div>
+    <div class="date">2026-07</div>
 
     <div id="version-bar">
         <input type="range" id="version-slider" min="0" max="0" value="0" step="1">
@@ -76,45 +76,82 @@ web pages you are reading now.
    
 </p>
    <h3 class='likesectionHead' id='the-writing-environment'><a id='x1-1000'></a>The Writing Environment</h3>
-<!-- l. 28 --><p class='noindent'>I write my essays as raw text files, typically using LaTeX(via MiniTex and TexStudio). LaTex was a recently
-new discovery for me. For those unfamiliar, it is a typesetting system which uses plain code in syntax to give
-you complete flexibility over your document as opposed to drag-and-drop tools in Word. This is particularly
-useful for math blocks, integrating figures and custom formatting. I am using it in a relatively simple way but
-the sky is the limit.
+<!-- l. 28 --><p class='noindent'>I write my essays as raw text files using LaTeX (via MiniTeX and TeXStudio). LaTeX was a recent discovery
+for me. For those unfamiliar, it is a typesetting system that uses plain-text markup to give you complete control
+over your document, as opposed to the drag-and-drop approach in Word. This is particularly useful for math
+blocks, integrating figures, and custom formatting. I am using it in a relatively simple way but the sky is the
+limit.
+</p><!-- l. 30 --><p class='indent'>   Each <span class='cmtt-10'>.tex </span>file begins with a short block of metadata comments that the pipeline reads:
+                                                                                      
+                                                                                      
+</p>
+   <pre class='verbatim' id='verbatim-1'>
+% ---
+% title: My Essay
+% date: 2026-07
+% nodes: Reflections, Tools
+% links: essays/another-essay.html
+% ---
+</pre>
+<!-- l. 39 --><p class='nopar'>
+</p><!-- l. 41 --><p class='noindent'>This frontmatter is how essays get tagged and connected to each other, which matters for both the graph view
+and the version history described below.
    
 </p>
    <h3 class='likesectionHead' id='the-build-pipeline'><a id='x1-2000'></a>The Build Pipeline</h3>
-<!-- l. 31 --><p class='noindent'>To get these raw text files onto the web, I use a custom Python script that triggers a compiler that translates
-the LaTex syntax into standard web-readable HTML. Next the script injects this content into a HTML
-template. The template provides minimal CSS styling and calls MathJax which acts as an engine to handle
-math symbols.
+<!-- l. 44 --><p class='noindent'>To get raw <span class='cmtt-10'>.tex </span>files onto the web, I run a single Python script: <span class='cmtt-10'>python3 publish.py drafts/my-essay.tex</span>.
+This triggers <span class='cmtt-10'>make4ht</span>, a compiler that translates LaTeX syntax into HTML. The script then injects this content
+into a styled HTML template, which provides minimal CSS and calls MathJax to render any mathematical
+notation.
+</p><!-- l. 46 --><p class='indent'>   The script also reads the frontmatter metadata and updates a central <span class='cmtt-10'>essays.json </span>file that tracks every
+essay. This JSON is then embedded directly into <span class='cmtt-10'>articles.html </span>so the essays page works even when opened as
+a local file, without needing a web server.
    
 </p>
    <h3 class='likesectionHead' id='graph-view'><a id='x1-3000'></a>Graph View</h3>
-<!-- l. 34 --><p class='noindent'>As I write, I tag my essays with core topics and sometimes link them to each other. The web of essay
-inter-connectedness can be seen on the graph view in the Essays tab. This is a complete rip-off from  <a href='https://obsidian.md'>Obsidian’s</a>
-graph view which I have been using for the past 3 years and highly recommend. During the build process, the
-pipeline compiles essay metadata into a single json, which can be then used by  <a href='https://github.com/vasturiano/force-graph'>force-graph</a> to read this data
-and render an interactive network visualisation. In this view, essays are clustered around their core themes and
-lines connect related pieces of writing.
+<!-- l. 49 --><p class='noindent'>As I write, I tag my essays with one or more of four core themes — Tools, Work, Reflections, and
+Reading — and sometimes link them directly to each other. The network of connections can be
+explored in the Graph View on the Essays tab. This is an unabashed copy of  <a href='https://obsidian.md'>Obsidian’s</a> graph view,
+which I have been using for the past three years and highly recommend. The pipeline compiles
+essay metadata into a single JSON file, which is then read by  <a href='https://github.com/vasturiano/force-graph'>force-graph</a> to render an interactive
+force-directed network. Essays cluster around their themes, and edges connect related pieces of
+writing.
    
 </p>
-   <h3 class='likesectionHead' id='hosting-and-analytics'><a id='x1-4000'></a>Hosting and Analytics</h3>
-<!-- l. 37 --><p class='noindent'>Because the pipeline outputs basic, static HTML, the website requires virtually no computing power to run as
-there are no databases to query or servers to maintain. I host the site through Porkbun. For tracking viewership,
-I wanted to avoid invasive cookies. I embedded a tiny tracking code from  <a href='https://www.goatcounter.com'>GoatCounter</a>. It is an
-open-source, free, privacy-friendly analytics tool for smaller websites. It doesn’t track users across the
-web or collect personal information, just logs anonymous pageviews so I can see what people are
-reading.
-</p><!-- l. 39 --><p class='indent'>   I hope you enjoyed visiting, I found this very satisfying to build. In the future, I might add more features
-such as mailing lists and a page for downloading some resources I have created so all of this is subject to change.
-Why not go back to the Home tab to read a random essay? Or check out the graph view in the Essays
-tab?
+   <h3 class='likesectionHead' id='version-history'><a id='x1-4000'></a>Version History</h3>
+<!-- l. 52 --><p class='noindent'>Some essays evolve significantly after their first publication. To make this visible to readers, each essay has a
+version history slider that appears just above the text when there is something to compare. Dragging the
+slider left reveals an earlier draft; releasing it fades the content out and replaces it with the old
+version.
+</p><!-- l. 54 --><p class='indent'>   The mechanism is lightweight and requires no backend. Every meaningful revision is committed to git with a
+message beginning <span class='cmtt-10'>publish: </span>— for example, <span class='cmtt-10'>publish: rewrote the opening section</span>. When a reader opens
+an essay, a small JavaScript block quietly queries the  <a href='https://docs.github.com/en/rest'>GitHub API</a> for the commit history of that specific file,
+filters to commits with this prefix, and builds the slider from them. Fetching the actual content of an old
+version is done on demand by pulling the raw HTML from GitHub at the relevant commit hash,
+parsing it, and swapping in the body. The results are cached in memory so subsequent moves are
+instant.
+                                                                                      
+                                                                                      
+</p><!-- l. 56 --><p class='indent'>   Commits that do not carry the <span class='cmtt-10'>publish: </span>prefix — typo fixes, formatting tweaks — are invisible to the
+slider. This keeps the version history intentional: it surfaces genuine drafts rather than every small
+edit.
+   
+</p>
+   <h3 class='likesectionHead' id='hosting-and-analytics'><a id='x1-5000'></a>Hosting and Analytics</h3>
+<!-- l. 59 --><p class='noindent'>Because the pipeline outputs plain, static HTML, the website requires virtually no computing power to run.
+There are no databases to query or servers to maintain. I host the site through Porkbun with the files served via
+GitHub Pages.
+</p><!-- l. 61 --><p class='indent'>   For viewership tracking I wanted to avoid invasive cookies. I embedded a tiny snippet from  <a href='https://www.goatcounter.com'>GoatCounter</a>, an
+open-source, privacy-friendly analytics tool. It logs only anonymous page views — no cross-site
+tracking, no personal data — so I can see what people are reading without compromising anyone’s
+privacy.
+</p><!-- l. 63 --><p class='indent'>   I hope you enjoyed visiting. I found this very satisfying to build. Why not check out the graph view in the
+Essays tab, or go back to the Home tab to read a random essay?
 </p>
     
 
     </div>
-    
+
     <div class="footer">
         &copy; 2026 Daksh Mehta
     </div>

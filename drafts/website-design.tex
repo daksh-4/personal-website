@@ -1,6 +1,6 @@
 % ---
 % title: Personal Website Design
-% date: 2026-06
+% date: 2026-07
 % category:
 % nodes: tools
 % links:
@@ -15,28 +15,51 @@
 \geometry{a4paper, margin=1in}
 
 \title{Personal Website Design}
-\date{June 2026}
+\date{July 2026}
 \author{Daksh Mehta}
 
 \begin{document}
 
-Firstly, thank you for visiting my corner of the internet, I hope you stay a while and read a few essays. This essay is for anyone who wants to know about the layout and backend for this website. All code can be found on my \href{https://github.com/daksh-4/personal-website}{github page}. 
+Firstly, thank you for visiting my corner of the internet, I hope you stay a while and read a few essays. This essay is for anyone who wants to know about the layout and backend for this website. All code can be found on my \href{https://github.com/daksh-4/personal-website}{github page}.
 
-This website is custom-built as a collection of static HTML files rather than using a website builder. At its core, it relies on a simple, automated pipeline built with Python that takes raw text and transforms it into the web pages you are reading now. 
+This website is custom-built as a collection of static HTML files rather than using a website builder. At its core, it relies on a simple, automated pipeline built with Python that takes raw text and transforms it into the web pages you are reading now.
 
 \section*{The Writing Environment}
-I write my essays as raw text files, typically using \LaTeX (via MiniTex and TexStudio). LaTex was a recently new discovery for me. For those unfamiliar, it is a typesetting system which uses plain code in syntax to give you complete flexibility over your document as opposed to drag-and-drop tools in Word. This is particularly useful for math blocks, integrating figures and custom formatting. I am using it in a relatively simple way but the sky is the limit. 
+I write my essays as raw text files using \LaTeX\ (via MiniTeX and TeXStudio). LaTeX was a recent discovery for me. For those unfamiliar, it is a typesetting system that uses plain-text markup to give you complete control over your document, as opposed to the drag-and-drop approach in Word. This is particularly useful for math blocks, integrating figures, and custom formatting. I am using it in a relatively simple way but the sky is the limit.
+
+Each \texttt{.tex} file begins with a short block of metadata comments that the pipeline reads:
+
+\begin{verbatim}
+% ---
+% title: My Essay
+% date: 2026-07
+% nodes: Reflections, Tools
+% links: essays/another-essay.html
+% ---
+\end{verbatim}
+
+\noindent This frontmatter is how essays get tagged and connected to each other, which matters for both the graph view and the version history described below.
 
 \section*{The Build Pipeline}
-To get these raw text files onto the web, I use a custom Python script that triggers a compiler that translates the LaTex syntax into standard web-readable HTML. Next the script injects this content into a HTML template. The template provides minimal CSS styling and calls MathJax which acts as an engine to handle math symbols. 
+To get raw \texttt{.tex} files onto the web, I run a single Python script: \texttt{python3 publish.py drafts/my-essay.tex}. This triggers \texttt{make4ht}, a compiler that translates LaTeX syntax into HTML. The script then injects this content into a styled HTML template, which provides minimal CSS and calls MathJax to render any mathematical notation.
+
+The script also reads the frontmatter metadata and updates a central \texttt{essays.json} file that tracks every essay. This JSON is then embedded directly into \texttt{articles.html} so the essays page works even when opened as a local file, without needing a web server.
 
 \section*{Graph View}
-As I write, I tag my essays with core topics and sometimes link them to each other. The web of essay inter-connectedness can be seen on the graph view in the Essays tab. This is a complete rip-off from \href{https://obsidian.md}{Obsidian's} graph view which I have been using for the past 3 years and highly recommend. During the build process, the pipeline compiles essay metadata into a single json, which can be then used by \href{https://github.com/vasturiano/force-graph}{force-graph} to read this data and render an interactive network visualisation. In this view, essays are clustered around their core themes and lines connect related pieces of writing. 
+As I write, I tag my essays with one or more of four core themes --- Tools, Work, Reflections, and Reading --- and sometimes link them directly to each other. The network of connections can be explored in the Graph View on the Essays tab. This is an unabashed copy of \href{https://obsidian.md}{Obsidian's} graph view, which I have been using for the past three years and highly recommend. The pipeline compiles essay metadata into a single JSON file, which is then read by \href{https://github.com/vasturiano/force-graph}{force-graph} to render an interactive force-directed network. Essays cluster around their themes, and edges connect related pieces of writing.
+
+\section*{Version History}
+Some essays evolve significantly after their first publication. To make this visible to readers, each essay has a version history slider that appears just above the text when there is something to compare. Dragging the slider left reveals an earlier draft; releasing it fades the content out and replaces it with the old version.
+
+The mechanism is lightweight and requires no backend. Every meaningful revision is committed to git with a message beginning \texttt{publish:} --- for example, \texttt{publish: rewrote the opening section}. When a reader opens an essay, a small JavaScript block quietly queries the \href{https://docs.github.com/en/rest}{GitHub API} for the commit history of that specific file, filters to commits with this prefix, and builds the slider from them. Fetching the actual content of an old version is done on demand by pulling the raw HTML from GitHub at the relevant commit hash, parsing it, and swapping in the body. The results are cached in memory so subsequent moves are instant.
+
+Commits that do not carry the \texttt{publish:} prefix --- typo fixes, formatting tweaks --- are invisible to the slider. This keeps the version history intentional: it surfaces genuine drafts rather than every small edit.
 
 \section*{Hosting and Analytics}
-Because the pipeline outputs basic, static HTML, the website requires virtually no computing power to run as there are no databases to query or servers to maintain. I host the site through Porkbun. For tracking viewership, I wanted to avoid invasive cookies. I embedded a tiny tracking code from \href{https://www.goatcounter.com}{GoatCounter}. It is an open-source, free, privacy-friendly analytics tool for smaller websites. It doesn't track users across the web or collect personal information, just logs anonymous pageviews so I can see what people are reading. 
+Because the pipeline outputs plain, static HTML, the website requires virtually no computing power to run. There are no databases to query or servers to maintain. I host the site through Porkbun with the files served via GitHub Pages.
 
-I hope you enjoyed visiting, I found this very satisfying to build. In the future, I might add more features such as mailing lists and a page for downloading some resources I have created so all of this is subject to change. Why not go back to the Home tab to read a random essay? Or check out the graph view in the Essays tab?
+For viewership tracking I wanted to avoid invasive cookies. I embedded a tiny snippet from \href{https://www.goatcounter.com}{GoatCounter}, an open-source, privacy-friendly analytics tool. It logs only anonymous page views --- no cross-site tracking, no personal data --- so I can see what people are reading without compromising anyone's privacy.
 
+I hope you enjoyed visiting. I found this very satisfying to build. Why not check out the graph view in the Essays tab, or go back to the Home tab to read a random essay?
 
 \end{document}
