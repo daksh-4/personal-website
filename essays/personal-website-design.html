@@ -139,16 +139,20 @@ This keeps the version history intentional: it surfaces genuine drafts rather th
 commits exist for an essay at all, the slider stays hidden entirely.
                                                                                       
                                                                                       
+</p><!-- l. 58 --><p class='indent'>   A <span class='cmti-10'>highlight changes </span>toggle sits next to the slider label when viewing the current version. Enabling it
+compares the current essay against the most recently published version, wrapping added paragraphs in green
+and struck-through removed paragraphs in red. The underlying mechanism is a longest-common-subsequence
+diff run on the paragraph blocks, preserving all HTML formatting in unchanged sections.
    
 </p>
    <h3 class='likesectionHead' id='hosting-and-analytics'><a id='x1-5000'></a>Hosting and Analytics</h3>
-<!-- l. 59 --><p class='noindent'>Because the pipeline outputs plain, static HTML, the website requires virtually no computing power to run.
+<!-- l. 61 --><p class='noindent'>Because the pipeline outputs plain, static HTML, the website requires virtually no computing power to run.
 There are no databases to query or servers to maintain. I host the site through Porkbun with the files served via
 GitHub Pages.
-</p><!-- l. 61 --><p class='indent'>   For viewership tracking I wanted to avoid invasive cookies. I embedded a tiny snippet from  <a href='https://www.goatcounter.com'>GoatCounter</a>, an
+</p><!-- l. 63 --><p class='indent'>   For viewership tracking I wanted to avoid invasive cookies. I embedded a tiny snippet from  <a href='https://www.goatcounter.com'>GoatCounter</a>, an
 open-source, privacy-friendly analytics tool. It logs only anonymous page views with no cross-site tracking or
 saving of personal information.
-</p><!-- l. 63 --><p class='indent'>   I hope you enjoyed visiting. I found this very satisfying to build. Why not check out the graph view in the
+</p><!-- l. 65 --><p class='indent'>   I hope you enjoyed visiting. I found this very satisfying to build. Why not check out the graph view in the
 Essays tab, or go back to the Home tab to read a random essay?
 </p>
     

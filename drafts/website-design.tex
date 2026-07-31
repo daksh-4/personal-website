@@ -55,6 +55,8 @@ The mechanism is lightweight and requires no backend. Every meaningful revision 
 
 Commits that do not carry the \texttt{publish:} prefix (typo fixes, formatting tweaks) are invisible to the slider. This keeps the version history intentional: it surfaces genuine drafts rather than every small edit. If no \texttt{publish:} commits exist for an essay at all, the slider stays hidden entirely.
 
+A \textit{highlight changes} toggle sits next to the slider label when viewing the current version. Enabling it compares the current essay against the most recently published version, wrapping added paragraphs in green and struck-through removed paragraphs in red. The underlying mechanism is a longest-common-subsequence diff run on the paragraph blocks, preserving all HTML formatting in unchanged sections.
+
 \section*{Hosting and Analytics}
 Because the pipeline outputs plain, static HTML, the website requires virtually no computing power to run. There are no databases to query or servers to maintain. I host the site through Porkbun with the files served via GitHub Pages.
 
