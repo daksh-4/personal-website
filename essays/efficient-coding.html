@@ -106,12 +106,22 @@
             font-size: 11px;
             color: #888;
         }
+        ins.vc-add { background: #d4edda; text-decoration: none; border-radius: 2px; padding: 0 1px; }
+        del.vc-del { background: #f8d7da; color: #721c24; text-decoration: line-through; border-radius: 2px; padding: 0 1px; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Efficient Coding</h1>
         <div class="date">February 2026</div>
+    <div id="version-bar">
+        <input type="range" id="version-slider" min="0" max="0" value="0" step="1">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
+            <div id="version-label"></div>
+            <label id="diff-label" style="display:none;font-size:11px;color:#888;cursor:pointer;user-select:none;"><input type="checkbox" id="diff-toggle" style="margin-right:4px;cursor:pointer;">highlight changes</label>
+        </div>
+    </div>
+
         
         <div class="nav">
             <a href="../index.html">Home</a>
@@ -168,86 +178,131 @@
         let commits;
         try {
             const cached = sessionStorage.getItem(cacheKey);
-            if (cached) {
-                commits = JSON.parse(cached);
-            } else {
-                const res = await fetch(
-                    `https://api.github.com/repos/${repo}/commits?path=${filePath}&per_page=100`
-                );
+            if (cached) commits = JSON.parse(cached);
+            else {
+                const res = await fetch(`https://api.github.com/repos/${repo}/commits?path=${filePath}&per_page=100`);
                 if (!res.ok) return;
                 commits = await res.json();
                 sessionStorage.setItem(cacheKey, JSON.stringify(commits));
             }
         } catch (e) { return; }
 
-        const versions = commits
-            .filter(c => /^publish:/i.test(c.commit.message.trim()))
-            .reverse();
-
+        const versions = commits.filter(c => /^publish:/i.test(c.commit.message.trim())).reverse();
         if (versions.length === 0) return;
 
-        const bar = document.getElementById('version-bar');
-        const slider = document.getElementById('version-slider');
-        const label = document.getElementById('version-label');
-        const contentEl = document.querySelector('.content');
+        const bar        = document.getElementById('version-bar');
+        const slider     = document.getElementById('version-slider');
+        const label      = document.getElementById('version-label');
+        const diffLabel  = document.getElementById('diff-label');
+        const diffToggle = document.getElementById('diff-toggle');
+        const contentEl  = document.querySelector('.content');
         const currentHTML = contentEl.innerHTML;
         const cache = {};
         let activePos = versions.length;
 
-        slider.max = versions.length;
+        slider.max   = versions.length;
         slider.value = versions.length;
 
         function fmtDate(iso) {
-            return new Date(iso).toLocaleDateString('en-GB', {
-                year: 'numeric', month: 'long', day: 'numeric'
-            });
+            return new Date(iso).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' });
         }
 
         function setLabel(pos) {
             if (pos === versions.length) {
                 label.textContent = 'Current version';
+                diffLabel.style.display = 'none';
             } else {
                 const v = versions[pos];
                 const msg = v.commit.message.trim().replace(/^publish:\s*/i, '');
                 label.textContent = fmtDate(v.commit.author.date) + (msg ? ' — ' + msg : '');
+                diffLabel.style.display = '';
             }
+        }
+
+        function getPlainText(html) {
+            const d = document.createElement('div');
+            d.innerHTML = html;
+            d.querySelectorAll('p,h1,h2,h3,h4,li,br').forEach(el => {
+                el.insertAdjacentText('beforebegin', '\n\n');
+            });
+            return d.textContent.replace(/\n{3,}/g, '\n\n').trim();
+        }
+
+        function tokenize(text) { return text.match(/\S+|\s+/g) || []; }
+
+        function computeDiff(oldText, newText) {
+            const a = tokenize(oldText), b = tokenize(newText);
+            const m = a.length, n = b.length;
+            if (m * n > 4000000) return null;
+            const dp = Array.from({length: m + 1}, () => new Int32Array(n + 1));
+            for (let i = 1; i <= m; i++)
+                for (let j = 1; j <= n; j++)
+                    dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] + 1 : Math.max(dp[i-1][j], dp[i][j-1]);
+            const ops = [];
+            let i = m, j = n;
+            while (i > 0 || j > 0) {
+                if (i > 0 && j > 0 && a[i-1] === b[j-1]) { ops.unshift({t:'=',s:a[i-1]}); i--; j--; }
+                else if (j > 0 && (i === 0 || dp[i][j-1] >= dp[i-1][j])) { ops.unshift({t:'+',s:b[j-1]}); j--; }
+                else { ops.unshift({t:'-',s:a[i-1]}); i--; }
+            }
+            return ops;
+        }
+
+        function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+        function renderDiff(ops) {
+            let out = '';
+            for (const op of ops) {
+                const e = esc(op.s);
+                if (op.t === '=') out += e;
+                else if (op.t === '+') out += '<ins class="vc-add">' + e + '</ins>';
+                else out += '<del class="vc-del">' + e + '</del>';
+            }
+            return '<p>' + out.replace(/\n\n/g, '</p><p>') + '</p>';
+        }
+
+        async function fetchOld(sha) {
+            if (cache[sha]) return;
+            try {
+                const r = await fetch(`https://raw.githubusercontent.com/${repo}/${sha}/${filePath}`);
+                const text = await r.text();
+                const doc = new DOMParser().parseFromString(text, 'text/html');
+                const old = doc.querySelector('.content');
+                cache[sha] = old ? old.innerHTML : '<p><em>Version unavailable.</em></p>';
+            } catch (e) {
+                cache[sha] = '<p><em>Version unavailable.</em></p>';
+            }
+        }
+
+        async function showContent(pos) {
+            contentEl.style.opacity = '0';
+            await new Promise(r => setTimeout(r, 150));
+            if (pos === versions.length) {
+                contentEl.innerHTML = currentHTML;
+            } else {
+                const sha = versions[pos].sha;
+                await fetchOld(sha);
+                if (diffToggle.checked) {
+                    const ops = computeDiff(getPlainText(cache[sha]), getPlainText(currentHTML));
+                    contentEl.innerHTML = ops ? renderDiff(ops) : cache[sha];
+                } else {
+                    contentEl.innerHTML = cache[sha];
+                }
+            }
+            activePos = pos;
+            contentEl.style.opacity = '1';
         }
 
         setLabel(versions.length);
         bar.style.display = 'block';
 
         slider.addEventListener('input', () => setLabel(parseInt(slider.value)));
-
         slider.addEventListener('change', async () => {
             const pos = parseInt(slider.value);
             if (pos === activePos) return;
-
-            contentEl.style.opacity = '0';
-            await new Promise(r => setTimeout(r, 150));
-
-            if (pos === versions.length) {
-                contentEl.innerHTML = currentHTML;
-            } else {
-                const sha = versions[pos].sha;
-                if (!cache[sha]) {
-                    try {
-                        const r = await fetch(
-                            `https://raw.githubusercontent.com/${repo}/${sha}/${filePath}`
-                        );
-                        const text = await r.text();
-                        const doc = new DOMParser().parseFromString(text, 'text/html');
-                        const old = doc.querySelector('.content');
-                        cache[sha] = old ? old.innerHTML : '<p><em>Version unavailable.</em></p>';
-                    } catch (e) {
-                        cache[sha] = '<p><em>Version unavailable.</em></p>';
-                    }
-                }
-                contentEl.innerHTML = cache[sha];
-            }
-
-            activePos = pos;
-            contentEl.style.opacity = '1';
+            await showContent(pos);
         });
+        diffToggle.addEventListener('change', () => showContent(activePos));
     })();
     </script>
 </body>

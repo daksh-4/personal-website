@@ -1,96 +1,47 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Essay Title Here - Daksh Mehta</title>
-    <!-- MathJax for rendering math -->
-    <script>
-      MathJax = {
-        tex: {
-          inlineMath: [['$', '$'], ['\\(', '\\)']],
-          displayMath: [['$$', '$$'], ['\\[', '\\]']]
-        }
-      };
-    </script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <style>
-        body {
-            font-family: Verdana, Geneva, sans-serif;
-            font-size: 14px;
-            line-height: 1.6;
-            color: #000;
-            background-color: #f6f6ef;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        h1, h2, h3, h4 { font-weight: bold; margin-bottom: 20px; margin-top: 30px; }
-        h1 { font-size: 20px; }
-        h2 { font-size: 18px; }
-        h3 { font-size: 16px; }
-        a { color: #000; text-decoration: underline; }
-        a:hover { color: #666; }
-        .date { color: #666; font-size: 12px; margin-bottom: 30px; }
-        .footer { margin-top: 50px; font-size: 12px; color: #666; border-top: 1px solid #ccc; padding-top: 20px; }
-        .nav { margin-bottom: 30px; }
-        .nav a { margin-right: 15px; }
-        .content { transition: opacity 0.15s ease; }
-        #version-bar { margin-bottom: 30px; display: none; }
-        #version-bar input[type=range] {
-            width: 100%;
-            margin: 0 0 6px 0;
-            accent-color: #333;
-            cursor: pointer;
-        }
-        #version-label {
-            font-size: 11px;
-            color: #888;
-        }
-        ins.vc-add { background: #d4edda; text-decoration: none; border-radius: 2px; padding: 0 1px; }
-        del.vc-del { background: #f8d7da; color: #721c24; text-decoration: line-through; border-radius: 2px; padding: 0 1px; }
-    </style>
-</head>
-<body>
-    <div class="nav">
-        <a href="../index.html">Home</a>
-        <a href="../articles.html">Essays</a>
-        <a href="../about.html">About</a>
-    </div>
-    
-    <h1>Your Essay Title Here</h1>
-    <div class="date">2026-06-13</div>
+#!/usr/bin/env python3
+"""
+Migrates all existing essay HTML files to add the diff toggle feature.
+Handles two cases:
+  - Essays already having <div id="version-bar"> (newer): update HTML + CSS + script
+  - Essays with version-bar in CSS/JS but no HTML element (older): add HTML + update CSS + script
+Safe to re-run — skips files already updated.
+"""
+import os, re
 
-    <div id="version-bar">
-        <input type="range" id="version-slider" min="0" max="0" value="0" step="1">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
-            <div id="version-label"></div>
-            <label id="diff-label" style="display:none;font-size:11px;color:#888;cursor:pointer;user-select:none;"><input type="checkbox" id="diff-toggle" style="margin-right:4px;cursor:pointer;">highlight changes</label>
-        </div>
-    </div>
+essays_dir = 'essays'
 
-    <div class="content">
-        
-   <div class='maketitle'>
-                                                                                      
-                                                                                      
-                                                                                      
-                                                                                      
+# --- CSS to inject (before </style>) ---
+NEW_CSS_LINES = (
+    '        ins.vc-add { background: #d4edda; text-decoration: none; '
+    'border-radius: 2px; padding: 0 1px; }\n'
+    '        del.vc-del { background: #f8d7da; color: #721c24; '
+    'text-decoration: line-through; border-radius: 2px; padding: 0 1px; }\n'
+)
 
-<h2 class='titleHead'>Your Essay Title Here</h2>
- <div class='author'><span class='cmr-12'>Daksh Mehta</span></div><br />
-<div class='date'><span class='cmr-12'>May 2026</span></div>
-   </div>
-    
+# --- Version bar HTML element ---
+NEW_BAR_HTML = (
+    '\n    <div id="version-bar">\n'
+    '        <input type="range" id="version-slider" min="0" max="0" value="0" step="1">\n'
+    '        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">\n'
+    '            <div id="version-label"></div>\n'
+    '            <label id="diff-label" style="display:none;font-size:11px;color:#888;'
+    'cursor:pointer;user-select:none;"><input type="checkbox" id="diff-toggle" '
+    'style="margin-right:4px;cursor:pointer;">highlight changes</label>\n'
+    '        </div>\n'
+    '    </div>\n'
+)
 
-    </div>
-    
-    <div class="footer">
-        &copy; 2026 Daksh Mehta
-    </div>
-    <script data-goatcounter="https://daksh-4.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-    <script>
+# Matches the old version bar when it exists (without diff-label)
+OLD_BAR_RE = re.compile(
+    r'<div id="version-bar">\s*'
+    r'<input[^>]*>\s*'
+    r'<div id="version-label"></div>\s*'
+    r'</div>',
+    re.DOTALL
+)
+
+# --- New JS script ---
+NEW_SCRIPT = """<script>
     (async function () {
         const repo = 'daksh-4/personal-website';
         const filename = window.location.pathname.split('/').pop() || '';
@@ -136,7 +87,7 @@
                 diffLabel.style.display = 'none';
             } else {
                 const v = versions[pos];
-                const msg = v.commit.message.trim().replace(/^publish:\s*/i, '');
+                const msg = v.commit.message.trim().replace(/^publish:\\s*/i, '');
                 label.textContent = fmtDate(v.commit.author.date) + (msg ? ' — ' + msg : '');
                 diffLabel.style.display = '';
             }
@@ -146,12 +97,12 @@
             const d = document.createElement('div');
             d.innerHTML = html;
             d.querySelectorAll('p,h1,h2,h3,h4,li,br').forEach(el => {
-                el.insertAdjacentText('beforebegin', '\n\n');
+                el.insertAdjacentText('beforebegin', '\\n\\n');
             });
-            return d.textContent.replace(/\n{3,}/g, '\n\n').trim();
+            return d.textContent.replace(/\\n{3,}/g, '\\n\\n').trim();
         }
 
-        function tokenize(text) { return text.match(/\S+|\s+/g) || []; }
+        function tokenize(text) { return text.match(/\\S+|\\s+/g) || []; }
 
         function computeDiff(oldText, newText) {
             const a = tokenize(oldText), b = tokenize(newText);
@@ -181,7 +132,7 @@
                 else if (op.t === '+') out += '<ins class="vc-add">' + e + '</ins>';
                 else out += '<del class="vc-del">' + e + '</del>';
             }
-            return '<p>' + out.replace(/\n\n/g, '</p><p>') + '</p>';
+            return '<p>' + out.replace(/\\n\\n/g, '</p><p>') + '</p>';
         }
 
         async function fetchOld(sha) {
@@ -227,6 +178,54 @@
         });
         diffToggle.addEventListener('change', () => showContent(activePos));
     })();
-    </script>
-</body>
-</html>
+    </script>"""
+
+OLD_SCRIPT_RE = re.compile(
+    r'<script>\s*\(async function \(\) \{.*?\}\)\(\);\s*</script>',
+    re.DOTALL
+)
+
+updated = skipped = 0
+
+for fname in sorted(os.listdir(essays_dir)):
+    if not fname.endswith('.html'):
+        continue
+    path = os.path.join(essays_dir, fname)
+    with open(path, 'r', encoding='utf-8') as f:
+        content = f.read()
+
+    # Skip files that don't have version bar at all
+    if '#version-bar' not in content and 'version-bar' not in content:
+        continue
+
+    # Skip already-updated files
+    if 'diff-label' in content:
+        print(f'  skip  {fname} (already updated)')
+        skipped += 1
+        continue
+
+    # 1. Add CSS (before </style>)
+    if 'ins.vc-add' not in content:
+        content = content.replace('    </style>', NEW_CSS_LINES + '    </style>', 1)
+
+    # 2. Version bar HTML: update if present, insert after .date div if absent
+    if OLD_BAR_RE.search(content):
+        content = OLD_BAR_RE.sub(NEW_BAR_HTML.strip(), content, count=1)
+    elif '<div id="version-bar">' not in content:
+        # Insert after the date div
+        content = re.sub(
+            r'(<div class="date">[^<]*</div>)',
+            r'\1' + NEW_BAR_HTML,
+            content, count=1
+        )
+
+    # 3. Replace version script
+    if OLD_SCRIPT_RE.search(content):
+        content = OLD_SCRIPT_RE.sub(lambda _: NEW_SCRIPT, content, count=1)
+
+    with open(path, 'w', encoding='utf-8') as f:
+        f.write(content)
+    print(f'  updated {fname}')
+    updated += 1
+
+print(f'\nDone: {updated} updated, {skipped} already up to date.')
