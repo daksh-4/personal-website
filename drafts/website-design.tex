@@ -53,7 +53,7 @@ Some essays evolve significantly after their first publication. To make this vis
 
 The mechanism is lightweight and requires no backend. Every meaningful revision is committed to git with a message beginning \texttt{publish:}, for example \texttt{publish: rewrote the opening section}. When a reader opens an essay, a small JavaScript block quietly queries the \href{https://docs.github.com/en/rest}{GitHub API} for the commit history of that specific file, filters to commits with this prefix, and builds the slider from them. Fetching the actual content of an old version is done on demand by pulling the raw HTML from GitHub at the relevant commit hash, parsing it, and swapping in the body. The results are cached in memory so subsequent moves are instant.
 
-Commits that do not carry the \texttt{publish:} prefix (typo fixes, formatting tweaks) are invisible to the slider. This keeps the version history intentional: it surfaces genuine drafts rather than every small edit.
+Commits that do not carry the \texttt{publish:} prefix (typo fixes, formatting tweaks) are invisible to the slider. This keeps the version history intentional: it surfaces genuine drafts rather than every small edit. If no \texttt{publish:} commits exist for an essay at all, the slider stays hidden entirely.
 
 \section*{Hosting and Analytics}
 Because the pipeline outputs plain, static HTML, the website requires virtually no computing power to run. There are no databases to query or servers to maintain. I host the site through Porkbun with the files served via GitHub Pages.
