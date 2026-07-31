@@ -84,12 +84,12 @@ NEW_SCRIPT = """<script>
         function setLabel(pos) {
             if (pos === versions.length) {
                 label.textContent = 'Current version';
-                diffLabel.style.display = 'none';
+                diffLabel.style.display = '';
             } else {
                 const v = versions[pos];
                 const msg = v.commit.message.trim().replace(/^publish:\\s*/i, '');
                 label.textContent = fmtDate(v.commit.author.date) + (msg ? ' — ' + msg : '');
-                diffLabel.style.display = '';
+                diffLabel.style.display = 'none';
             }
         }
 
@@ -149,16 +149,22 @@ NEW_SCRIPT = """<script>
             contentEl.style.opacity = '0';
             await new Promise(r => setTimeout(r, 150));
             if (pos === versions.length) {
-                contentEl.innerHTML = currentHTML;
+                if (diffToggle.checked) {
+                    const sha = versions[versions.length - 1].sha;
+                    await fetchOld(sha);
+                    if (cache[sha]) {
+                        const ops = blockDiff(getBlocks(cache[sha]), getBlocks(currentHTML));
+                        contentEl.innerHTML = ops ? renderBlockDiff(ops) : currentHTML;
+                    } else {
+                        contentEl.innerHTML = currentHTML;
+                    }
+                } else {
+                    contentEl.innerHTML = currentHTML;
+                }
             } else {
                 const sha = versions[pos].sha;
                 await fetchOld(sha);
-                if (diffToggle.checked && cache[sha]) {
-                    const ops = blockDiff(getBlocks(cache[sha]), getBlocks(currentHTML));
-                    contentEl.innerHTML = ops ? renderBlockDiff(ops) : currentHTML;
-                } else {
-                    contentEl.innerHTML = cache[sha] || currentHTML;
-                }
+                contentEl.innerHTML = cache[sha] || currentHTML;
             }
             activePos = pos;
             contentEl.style.opacity = '1';
@@ -195,8 +201,8 @@ for fname in sorted(os.listdir(essays_dir)):
     if '#version-bar' not in content and 'version-bar' not in content:
         continue
 
-    # Skip already-updated files (getBlocks = new block-level diff)
-    if 'getBlocks' in content:
+    # Skip already-updated files (marker = toggle on current, compare vs previous)
+    if 'versions[versions.length - 1].sha' in content:
         print(f'  skip  {fname} (already updated)')
         skipped += 1
         continue
