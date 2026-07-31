@@ -82,18 +82,6 @@
         "links": []
     },
     {
-        "title": "Living Essays",
-        "url": "essays/living-essays.html",
-        "date": "2026-07",
-        "category": "",
-        "nodes": [
-            "Tools"
-        ],
-        "links": [
-            "essays/personal-website-design.html"
-        ]
-    },
-    {
         "title": "Personal Website Design",
         "url": "essays/personal-website-design.html",
         "date": "2026-07",
@@ -102,5 +90,18 @@
             "Tools"
         ],
         "links": []
+    },
+    {
+        "title": "Living Essays",
+        "url": "essays/living-essays.html",
+        "date": "2026-07",
+        "category": "",
+        "nodes": [
+            "Tools"
+        ],
+        "links": [
+            "personal-website-design",
+            "sharing-work-online"
+        ]
     }
 ]

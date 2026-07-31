@@ -69,9 +69,9 @@ filters to commits with this prefix, and builds the slider from them. Fetching t
 version is done on demand by pulling the raw HTML from GitHub at the relevant commit hash,
 parsing it, and swapping in the body. The results are cached in memory so subsequent moves are
 instant.
-</p><!-- l. 56 --><p class='indent'>   Commits that do not carry the <span class='cmtt-10'>publish: </span>prefix (typo fixes, formatting tweaks) are invisible to the
-slider. This keeps the version history intentional: it surfaces genuine drafts rather than every small
-edit.
+</p><!-- l. 56 --><p class='indent'>   Commits that do not carry the <span class='cmtt-10'>publish: </span>prefix (typo fixes, formatting tweaks) are invisible to the slider.
+This keeps the version history intentional: it surfaces genuine drafts rather than every small edit. If no <span class='cmtt-10'>publish:</span>
+commits exist for an essay at all, the slider stays hidden entirely.
                                                                                       
                                                                                       
    
@@ -81,9 +81,8 @@ edit.
 There are no databases to query or servers to maintain. I host the site through Porkbun with the files served via
 GitHub Pages.
 </p><!-- l. 61 --><p class='indent'>   For viewership tracking I wanted to avoid invasive cookies. I embedded a tiny snippet from  <a href='https://www.goatcounter.com'>GoatCounter</a>, an
-open-source, privacy-friendly analytics tool. It logs only anonymous page views — no cross-site
-tracking, no personal data — so I can see what people are reading without compromising anyone’s
-privacy.
+open-source, privacy-friendly analytics tool. It logs only anonymous page views with no cross-site tracking or
+saving of personal information.
 </p><!-- l. 63 --><p class='indent'>   I hope you enjoyed visiting. I found this very satisfying to build. Why not check out the graph view in the
 Essays tab, or go back to the Home tab to read a random essay?
 </p>
