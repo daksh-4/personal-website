@@ -185,7 +185,7 @@
             "Tools"
         ],
         "links": [
-            "personal-website-design"
+            "essays/personal-website-design.html"
         ]
     },
     {
@@ -337,7 +337,6 @@
                     const label = node.name || node.id;
                     const fontSize = node.group === 'core' ? 14 / globalScale : 11 / globalScale;
                     ctx.font = `${node.group === 'core' ? 'bold ' : ''}${fontSize}px Verdana, sans-serif`;
-                    const textWidth = ctx.measureText(label).width;
                     const r = node.group === 'core' ? 6 : 3;
 
                     ctx.beginPath();
@@ -357,12 +356,16 @@
                     ctx.fillStyle = color;
                     ctx.fill();
                 })
-                .linkColor(() => '#ccc')
+                .linkColor(() => '#999')
+                .linkWidth(1.5)
                 .linkDirectionalParticles(2)
                 .linkDirectionalParticleSpeed(0.005)
                 .onNodeClick(node => {
                     if (node.url) window.location.href = node.url;
                 });
+
+            myGraph.d3Force('link').strength(0.8);
+            myGraph.d3Force('charge').strength(-120);
         }
     </script>
     <script data-goatcounter="https://daksh-4.goatcounter.com/count"
