@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Living Essays - Daksh Mehta</title>
+    <!-- MathJax for rendering math -->
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        }
+      };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: Verdana, Geneva, sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #000;
+            background-color: #f6f6ef;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2, h3, h4 { font-weight: bold; margin-bottom: 20px; margin-top: 30px; }
+        h1 { font-size: 20px; }
+        h2 { font-size: 18px; }
+        h3 { font-size: 16px; }
+        a { color: #000; text-decoration: underline; }
+        a:hover { color: #666; }
+        .date { color: #666; font-size: 12px; margin-bottom: 20px; }
+        .footer { margin-top: 50px; font-size: 12px; color: #666; border-top: 1px solid #ccc; padding-top: 20px; }
+        .nav { margin-bottom: 30px; }
+        .nav a { margin-right: 15px; }
+        .content { transition: opacity 0.15s ease; }
+        #version-bar { margin-bottom: 30px; display: none; }
+        #version-bar input[type=range] {
+            width: 100%;
+            margin: 0 0 6px 0;
+            accent-color: #333;
+            cursor: pointer;
+        }
+        #version-label {
+            font-size: 11px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="../index.html">Home</a>
+        <a href="../articles.html">Essays</a>
+        <a href="../about.html">About</a>
+    </div>
+
+    <h1>Living Essays</h1>
+    <div class="date">2026-07</div>
+
+    <div id="version-bar">
+        <input type="range" id="version-slider" min="0" max="0" value="0" step="1">
+        <div id="version-label"></div>
+    </div>
+
+    <div class="content">
+        
+<!-- l. 23 --><p class='noindent'>Future essays on this website will look slightly different. I am in the process of implementing a version history so
+viewers can see how an essay or a reflection has changed over time. I like the idea that writing and reflection is a
+continuous, not discrete, process. Essays wil now contain a slider with which readers can turn back time to view
+older versions of the current page.
+</p><!-- l. 25 --><p class='indent'>   Most writing I’ve encountered whether on blog websites similar to this one, or academic papers seem like
+they landed as fully formed concepts. There are obviously many interesting drafts that get discarded and lost to
+the sands of time, deemed unworthy of final publication. I think these older drafts can be revealing and
+important too. Aside from lexical and grammatical changes, the narrative has natural perturbations as new
+evidence and ideas get folded into the discussion.
+</p><!-- l. 27 --><p class='indent'>   In my opinion, there is also value in presenting a half-finished idea which can later be revisited. Not
+everything has to be polished with clear conclusions, most of the time actually it is unclear where to go and the
+development takes time.
+</p><!-- l. 29 --><p class='indent'>   I’ve become more cognisant of this year, during my Master’s. Throughout the year I tried to stay on top of
+writing small sections and paragraphs based on what I was doing at the time, in hopes that when I get to the
+write up at the end it will be easier to string my ideas together. Looking back through these old drafts reveals
+times I completely misunderstood something or an assumption I hadn’t questioned. More commonly, the
+changes are subtle. An argument becomes a little more nuanced or a sentence becomes less certain. These
+changes are the honest record of how thinking develops and the finished product fails to capture this
+process.
+</p><!-- l. 31 --><p class='indent'>   I’ve come to appreciate that knowledge is rarely static. Scientific understanding evolves through revision.
+Clinical practice changes as new evidence emerges. Good research is built on the willingness to revisit old
+conclusions in the light of better information.
+</p><!-- l. 33 --><p class='indent'>   This website has always been an experiment in capturing my thoughts and opinions at different points of
+time and how what I read and do influences them. This change attempts to become more authentic
+to the website’s goal and also encourage me to write more without being worried about a final
+product.
+</p>
+    
+
+    </div>
+
+    <div class="footer">
+        &copy; 2026 Daksh Mehta
+    </div>
+    <script data-goatcounter="https://daksh-4.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+    <script>
+    (async function () {
+        const repo = 'daksh-4/personal-website';
+        const filename = window.location.pathname.split('/').pop() || '';
+        if (!filename) return;
+        const filePath = 'essays/' + filename;
+        const cacheKey = 'vc_' + filename;
+
+        let commits;
+        try {
+            const cached = sessionStorage.getItem(cacheKey);
+            if (cached) {
+                commits = JSON.parse(cached);
+            } else {
+                const res = await fetch(
+                    `https://api.github.com/repos/${repo}/commits?path=${filePath}&per_page=100`
+                );
+                if (!res.ok) return;
+                commits = await res.json();
+                sessionStorage.setItem(cacheKey, JSON.stringify(commits));
+            }
+        } catch (e) { return; }
+
+        const versions = commits
+            .filter(c => /^publish:/i.test(c.commit.message.trim()))
+            .reverse();
+
+        if (versions.length === 0) return;
+
+        const bar = document.getElementById('version-bar');
+        const slider = document.getElementById('version-slider');
+        const label = document.getElementById('version-label');
+        const contentEl = document.querySelector('.content');
+        const currentHTML = contentEl.innerHTML;
+        const cache = {};
+        let activePos = versions.length;
+
+        slider.max = versions.length;
+        slider.value = versions.length;
+
+        function fmtDate(iso) {
+            return new Date(iso).toLocaleDateString('en-GB', {
+                year: 'numeric', month: 'long', day: 'numeric'
+            });
+        }
+
+        function setLabel(pos) {
+            if (pos === versions.length) {
+                label.textContent = 'Current version';
+            } else {
+                const v = versions[pos];
+                const msg = v.commit.message.trim().replace(/^publish:\s*/i, '');
+                label.textContent = fmtDate(v.commit.author.date) + (msg ? ' — ' + msg : '');
+            }
+        }
+
+        setLabel(versions.length);
+        bar.style.display = 'block';
+
+        slider.addEventListener('input', () => setLabel(parseInt(slider.value)));
+
+        slider.addEventListener('change', async () => {
+            const pos = parseInt(slider.value);
+            if (pos === activePos) return;
+
+            contentEl.style.opacity = '0';
+            await new Promise(r => setTimeout(r, 150));
+
+            if (pos === versions.length) {
+                contentEl.innerHTML = currentHTML;
+            } else {
+                const sha = versions[pos].sha;
+                if (!cache[sha]) {
+                    try {
+                        const r = await fetch(
+                            `https://raw.githubusercontent.com/${repo}/${sha}/${filePath}`
+                        );
+                        const text = await r.text();
+                        const doc = new DOMParser().parseFromString(text, 'text/html');
+                        const old = doc.querySelector('.content');
+                        cache[sha] = old ? old.innerHTML : '<p><em>Version unavailable.</em></p>';
+                    } catch (e) {
+                        cache[sha] = '<p><em>Version unavailable.</em></p>';
+                    }
+                }
+                contentEl.innerHTML = cache[sha];
+            }
+
+            activePos = pos;
+            contentEl.style.opacity = '1';
+        });
+    })();
+    </script>
+</body>
+</html>

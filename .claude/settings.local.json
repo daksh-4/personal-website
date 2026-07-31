@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p \"/Users/dakshmehta/Library/CloudStorage/OneDrive-King'sCollegeLondon/Desktop/code/personal website/.claude\")",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(git checkout *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(gh pr create --title 'Fix list and graph views on articles page' --body ' *)",
+      "Bash(brew install *)",
+      "Bash(python3 -c ' *)"
+    ]
+  }
+}
