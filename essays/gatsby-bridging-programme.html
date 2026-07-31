@@ -177,46 +177,43 @@
             }
         }
 
-        function getPlainText(html) {
+        function getBlocks(html) {
             const d = document.createElement('div');
             d.innerHTML = html;
-            d.querySelectorAll('p,h1,h2,h3,h4,li,br').forEach(el => {
-                el.insertAdjacentText('beforebegin', '\n\n');
-            });
-            return d.textContent.replace(/\n{3,}/g, '\n\n').trim();
+            return Array.from(d.children).map(el => ({
+                html: el.outerHTML,
+                key:  el.textContent.replace(/\s+/g, ' ').trim()
+            })).filter(b => b.key);
         }
 
-        function tokenize(text) { return text.match(/\S+|\s+/g) || []; }
-
-        function computeDiff(oldText, newText) {
-            const a = tokenize(oldText), b = tokenize(newText);
-            const m = a.length, n = b.length;
-            if (m * n > 4000000) return null;
+        function blockDiff(oldB, newB) {
+            const m = oldB.length, n = newB.length;
+            if (m * n > 100000) return null;
             const dp = Array.from({length: m + 1}, () => new Int32Array(n + 1));
             for (let i = 1; i <= m; i++)
                 for (let j = 1; j <= n; j++)
-                    dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] + 1 : Math.max(dp[i-1][j], dp[i][j-1]);
+                    dp[i][j] = oldB[i-1].key === newB[j-1].key
+                        ? dp[i-1][j-1] + 1 : Math.max(dp[i-1][j], dp[i][j-1]);
             const ops = [];
             let i = m, j = n;
             while (i > 0 || j > 0) {
-                if (i > 0 && j > 0 && a[i-1] === b[j-1]) { ops.unshift({t:'=',s:a[i-1]}); i--; j--; }
-                else if (j > 0 && (i === 0 || dp[i][j-1] >= dp[i-1][j])) { ops.unshift({t:'+',s:b[j-1]}); j--; }
-                else { ops.unshift({t:'-',s:a[i-1]}); i--; }
+                if (i > 0 && j > 0 && oldB[i-1].key === newB[j-1].key) {
+                    ops.unshift({t:'=', b: newB[j-1]}); i--; j--;
+                } else if (j > 0 && (i === 0 || dp[i][j-1] >= dp[i-1][j])) {
+                    ops.unshift({t:'+', b: newB[j-1]}); j--;
+                } else {
+                    ops.unshift({t:'-', b: oldB[i-1]}); i--;
+                }
             }
             return ops;
         }
 
-        function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
-
-        function renderDiff(ops) {
-            let out = '';
-            for (const op of ops) {
-                const e = esc(op.s);
-                if (op.t === '=') out += e;
-                else if (op.t === '+') out += '<ins class="vc-add">' + e + '</ins>';
-                else out += '<del class="vc-del">' + e + '</del>';
-            }
-            return '<p>' + out.replace(/\n\n/g, '</p><p>') + '</p>';
+        function renderBlockDiff(ops) {
+            return ops.map(op => {
+                if (op.t === '=') return op.b.html;
+                if (op.t === '+') return '<div style="background:#d4edda;border-radius:3px;padding:0 4px;margin:2px 0;">' + op.b.html + '</div>';
+                return '<div style="background:#f8d7da;color:#721c24;text-decoration:line-through;border-radius:3px;padding:0 4px;margin:2px 0;opacity:0.8;">' + op.b.html + '</div>';
+            }).join('');
         }
 
         async function fetchOld(sha) {
@@ -226,9 +223,9 @@
                 const text = await r.text();
                 const doc = new DOMParser().parseFromString(text, 'text/html');
                 const old = doc.querySelector('.content');
-                cache[sha] = old ? old.innerHTML : '<p><em>Version unavailable.</em></p>';
+                cache[sha] = old ? old.innerHTML : '';
             } catch (e) {
-                cache[sha] = '<p><em>Version unavailable.</em></p>';
+                cache[sha] = '';
             }
         }
 
@@ -240,11 +237,11 @@
             } else {
                 const sha = versions[pos].sha;
                 await fetchOld(sha);
-                if (diffToggle.checked) {
-                    const ops = computeDiff(getPlainText(cache[sha]), getPlainText(currentHTML));
-                    contentEl.innerHTML = ops ? renderDiff(ops) : cache[sha];
+                if (diffToggle.checked && cache[sha]) {
+                    const ops = blockDiff(getBlocks(cache[sha]), getBlocks(currentHTML));
+                    contentEl.innerHTML = ops ? renderBlockDiff(ops) : currentHTML;
                 } else {
-                    contentEl.innerHTML = cache[sha];
+                    contentEl.innerHTML = cache[sha] || currentHTML;
                 }
             }
             activePos = pos;
