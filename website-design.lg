@@ -1,3 +1,4 @@
+htfcss: cmti  font-style: italic;
 htfcss: cmtt font-family: monospace,monospace;
 File: website-design.html
 File: website-design.css
@@ -159,3 +160,4 @@ Css: .rotatebox{display: inline-block;}
 --- characters ---
 Font("cmr","10","10","100")
 Font("cmtt","10","10","100")
+Font("cmti","10","10","100")

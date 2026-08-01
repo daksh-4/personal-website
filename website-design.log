@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=latex 2025.12.1)  31 JUL 2026 13:36
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=latex 2025.12.1)  31 JUL 2026 14:43
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -817,12 +817,12 @@ L3 programming layer <2025-01-18>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 14453 strings out of 473191
- 211905 string characters out of 5715826
+ 14455 strings out of 473191
+ 211926 string characters out of 5715826
  732368 words of memory out of 5000000
- 37348 multiletter control sequences out of 15000+600000
- 559610 words of font info for 39 fonts, out of 8000000 for 9000
+ 37349 multiletter control sequences out of 15000+600000
+ 559956 words of font info for 40 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  80i,5n,96p,1198b,474s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on website-design.dvi (3 pages, 20492 bytes).
+Output written on website-design.dvi (3 pages, 21076 bytes).
