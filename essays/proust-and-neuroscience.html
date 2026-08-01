@@ -253,12 +253,61 @@
             return ops;
         }
 
-        function renderBlockDiff(ops) {
+        function tokenize(text) { return text.match(/\S+|\s+/g) || []; }
+
+        function wordDiff(oldT, newT) {
+            const a = tokenize(oldT), b = tokenize(newT);
+            const m = a.length, n = b.length;
+            if (m * n > 4000000) return null;
+            const dp = Array.from({length: m + 1}, () => new Int32Array(n + 1));
+            for (let i = 1; i <= m; i++)
+                for (let j = 1; j <= n; j++)
+                    dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] + 1 : Math.max(dp[i-1][j], dp[i][j-1]);
+            const ops = [];
+            let i = m, j = n;
+            while (i > 0 || j > 0) {
+                if (i > 0 && j > 0 && a[i-1] === b[j-1]) { ops.unshift({t:'=',s:a[i-1]}); i--; j--; }
+                else if (j > 0 && (i === 0 || dp[i][j-1] >= dp[i-1][j])) { ops.unshift({t:'+',s:b[j-1]}); j--; }
+                else { ops.unshift({t:'-',s:a[i-1]}); i--; }
+            }
+            return ops;
+        }
+
+        function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+        function renderWordDiff(ops) {
             return ops.map(op => {
-                if (op.t === '=') return op.b.html;
-                if (op.t === '+') return '<div style="background:#d4edda;border-radius:3px;padding:0 4px;margin:2px 0;">' + op.b.html + '</div>';
-                return '<div style="background:#f8d7da;color:#721c24;text-decoration:line-through;border-radius:3px;padding:0 4px;margin:2px 0;opacity:0.8;">' + op.b.html + '</div>';
+                if (op.t === '=') return esc(op.s);
+                if (op.t === '+') return '<mark style="background:#d4edda;text-decoration:none;">' + esc(op.s) + '</mark>';
+                return '<mark style="background:#f8d7da;text-decoration:line-through;color:#721c24;">' + esc(op.s) + '</mark>';
             }).join('');
+        }
+
+        function renderBlockDiff(ops) {
+            let html = '', i = 0;
+            while (i < ops.length) {
+                if (ops[i].t === '=') {
+                    html += ops[i].b.html; i++;
+                } else {
+                    const dels = [], ins = [];
+                    while (i < ops.length && ops[i].t === '-') { dels.push(ops[i]); i++; }
+                    while (i < ops.length && ops[i].t === '+') { ins.push(ops[i]); i++; }
+                    if (!dels.length) {
+                        ins.forEach(op => { html += '<div style="background:#d4edda;border-radius:3px;padding:0 4px;margin:2px 0;">' + op.b.html + '</div>'; });
+                    } else if (!ins.length) {
+                        dels.forEach(op => { html += '<div style="background:#f8d7da;color:#721c24;text-decoration:line-through;border-radius:3px;padding:0 4px;margin:2px 0;opacity:0.8;">' + op.b.html + '</div>'; });
+                    } else {
+                        const wOps = wordDiff(dels.map(o => o.b.key).join(' '), ins.map(o => o.b.key).join(' '));
+                        if (wOps) {
+                            html += '<p style="margin:4px 0;">' + renderWordDiff(wOps) + '</p>';
+                        } else {
+                            dels.forEach(op => { html += '<div style="background:#f8d7da;color:#721c24;text-decoration:line-through;border-radius:3px;padding:0 4px;margin:2px 0;opacity:0.8;">' + op.b.html + '</div>'; });
+                            ins.forEach(op => { html += '<div style="background:#d4edda;border-radius:3px;padding:0 4px;margin:2px 0;">' + op.b.html + '</div>'; });
+                        }
+                    }
+                }
+            }
+            return html;
         }
 
         async function fetchOld(sha) {
