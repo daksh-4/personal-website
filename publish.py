@@ -286,7 +286,7 @@ def create_essay_html(title, content, category=None, date="2026"):
             return ops;
         }}
 
-        function tokenize(text) {{ return text.match(/\\S+|\\s+/g) || []; }}
+        function tokenize(text) {{ return text.split(/\\s+/).filter(Boolean); }}
 
         function wordDiff(oldT, newT) {{
             const a = tokenize(oldT), b = tokenize(newT);
@@ -313,7 +313,7 @@ def create_essay_html(title, content, category=None, date="2026"):
                 if (op.t === '=') return esc(op.s);
                 if (op.t === '+') return '<mark style="background:#d4edda;text-decoration:none;">' + esc(op.s) + '</mark>';
                 return '<mark style="background:#f8d7da;text-decoration:line-through;color:#721c24;">' + esc(op.s) + '</mark>';
-            }}).join('');
+            }}).join(' ');
         }}
 
         function renderBlockDiff(ops) {{

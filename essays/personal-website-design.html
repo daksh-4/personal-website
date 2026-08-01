@@ -259,7 +259,7 @@ Essays tab, or go back to the Home tab to read a random essay?
             return ops;
         }
 
-        function tokenize(text) { return text.match(/\S+|\s+/g) || []; }
+        function tokenize(text) { return text.split(/\s+/).filter(Boolean); }
 
         function wordDiff(oldT, newT) {
             const a = tokenize(oldT), b = tokenize(newT);
@@ -286,7 +286,7 @@ Essays tab, or go back to the Home tab to read a random essay?
                 if (op.t === '=') return esc(op.s);
                 if (op.t === '+') return '<mark style="background:#d4edda;text-decoration:none;">' + esc(op.s) + '</mark>';
                 return '<mark style="background:#f8d7da;text-decoration:line-through;color:#721c24;">' + esc(op.s) + '</mark>';
-            }).join('');
+            }).join(' ');
         }
 
         function renderBlockDiff(ops) {

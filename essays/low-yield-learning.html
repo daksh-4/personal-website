@@ -164,7 +164,7 @@ differently?
                 diffLabel.style.display = '';
             } else {
                 const v = versions[pos];
-                const msg = v.commit.message.trim().replace(/^publish:\s*/i, '');
+                const msg = v.commit.message.trim().replace(/^publish:\\s*/i, '');
                 label.textContent = fmtDate(v.commit.author.date) + (msg ? ' — ' + msg : '');
                 diffLabel.style.display = 'none';
             }
@@ -175,7 +175,7 @@ differently?
             d.innerHTML = html;
             return Array.from(d.children).map(el => ({
                 html: el.outerHTML,
-                key:  el.textContent.replace(/\s+/g, ' ').trim()
+                key:  el.textContent.replace(/\\s+/g, ' ').trim()
             })).filter(b => b.key);
         }
 
@@ -201,7 +201,7 @@ differently?
             return ops;
         }
 
-        function tokenize(text) { return text.match(/\S+|\s+/g) || []; }
+        function tokenize(text) { return text.split(/\s+/).filter(Boolean); }
 
         function wordDiff(oldT, newT) {
             const a = tokenize(oldT), b = tokenize(newT);
@@ -228,7 +228,7 @@ differently?
                 if (op.t === '=') return esc(op.s);
                 if (op.t === '+') return '<mark style="background:#d4edda;text-decoration:none;">' + esc(op.s) + '</mark>';
                 return '<mark style="background:#f8d7da;text-decoration:line-through;color:#721c24;">' + esc(op.s) + '</mark>';
-            }).join('');
+            }).join(' ');
         }
 
         function renderBlockDiff(ops) {
@@ -272,7 +272,7 @@ differently?
         }
 
         function blockKeys(html) {
-            return getBlocks(html).map(b => b.key).join('\u0001');
+            return getBlocks(html).map(b => b.key).join('');
         }
 
         // Picks what to diff the current view against. If there's a live draft

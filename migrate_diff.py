@@ -137,7 +137,7 @@ NEW_SCRIPT = r"""<script>
             return ops;
         }
 
-        function tokenize(text) { return text.match(/\S+|\s+/g) || []; }
+        function tokenize(text) { return text.split(/\s+/).filter(Boolean); }
 
         function wordDiff(oldT, newT) {
             const a = tokenize(oldT), b = tokenize(newT);
@@ -164,7 +164,7 @@ NEW_SCRIPT = r"""<script>
                 if (op.t === '=') return esc(op.s);
                 if (op.t === '+') return '<mark style="background:#d4edda;text-decoration:none;">' + esc(op.s) + '</mark>';
                 return '<mark style="background:#f8d7da;text-decoration:line-through;color:#721c24;">' + esc(op.s) + '</mark>';
-            }).join('');
+            }).join(' ');
         }
 
         function renderBlockDiff(ops) {
@@ -286,8 +286,8 @@ for fname in sorted(os.listdir(essays_dir)):
     if '#version-bar' not in content and 'version-bar' not in content:
         continue
 
-    # Skip already-updated files (marker = firstCommit baseline in slider)
-    if 'firstCommit' in content:
+    # Skip already-updated files (marker = word-only tokenizer, no stray whitespace tokens)
+    if 'split(/\\s+/).filter(Boolean)' in content:
         print(f'  skip  {fname} (already updated)')
         skipped += 1
         continue
