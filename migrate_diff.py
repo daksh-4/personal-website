@@ -197,15 +197,40 @@ NEW_SCRIPT = r"""<script>
             }
         }
 
+        function blockKeys(html) {
+            return getBlocks(html).map(b => b.key).join('');
+        }
+
+        // Picks what to diff the current view against. If there's a live draft
+        // since the last publish, diff against that. Otherwise (current text is
+        // identical to the last publish) fall back to showing what that publish
+        // itself changed, comparing it against whatever preceded it in the
+        // file's full history, tagged publish or not.
+        async function getDiffTarget() {
+            const lastSha = versions[versions.length - 1].sha;
+            await fetchOld(lastSha);
+            const lastContent = cache[lastSha];
+            if (!lastContent) return null;
+            if (blockKeys(lastContent) !== blockKeys(currentHTML)) {
+                return { oldHTML: lastContent, newHTML: currentHTML };
+            }
+            const idx = commits.findIndex(c => c.sha === lastSha);
+            const prevCommit = idx >= 0 ? commits[idx + 1] : null;
+            if (!prevCommit) return null;
+            await fetchOld(prevCommit.sha);
+            const prevContent = cache[prevCommit.sha];
+            if (!prevContent || blockKeys(prevContent) === blockKeys(lastContent)) return null;
+            return { oldHTML: prevContent, newHTML: lastContent };
+        }
+
         async function showContent(pos) {
             contentEl.style.opacity = '0';
             await new Promise(r => setTimeout(r, 150));
             if (pos === versions.length) {
                 if (diffToggle.checked) {
-                    const sha = versions[versions.length - 1].sha;
-                    await fetchOld(sha);
-                    if (cache[sha]) {
-                        const ops = blockDiff(getBlocks(cache[sha]), getBlocks(currentHTML));
+                    const target = await getDiffTarget();
+                    if (target) {
+                        const ops = blockDiff(getBlocks(target.oldHTML), getBlocks(target.newHTML));
                         contentEl.innerHTML = ops ? renderBlockDiff(ops) : currentHTML;
                     } else {
                         contentEl.innerHTML = currentHTML;
@@ -253,8 +278,8 @@ for fname in sorted(os.listdir(essays_dir)):
     if '#version-bar' not in content and 'version-bar' not in content:
         continue
 
-    # Skip already-updated files (marker = sessionStorage TTL cache)
-    if "cacheKey + '_ts'" in content:
+    # Skip already-updated files (marker = smart diff-target fallback)
+    if 'getDiffTarget' in content:
         print(f'  skip  {fname} (already updated)')
         skipped += 1
         continue
