@@ -148,8 +148,18 @@
             }
         } catch (e) { return; }
 
-        const versions = commits.filter(c => /^publish:/i.test(c.commit.message.trim())).reverse();
-        if (versions.length === 0) return;
+        const publishOnly = commits.filter(c => /^publish:/i.test(c.commit.message.trim())).reverse();
+        if (publishOnly.length === 0) return;
+
+        // The commit that first created this file is always a meaningful
+        // baseline, even if it predates the publish: convention. Prepend it
+        // so the slider's earliest stop is a real draft, not a duplicate of
+        // the first publish (which may be byte-identical to it).
+        const chronological = commits.slice().reverse();
+        const firstCommit = chronological[0];
+        const versions = (firstCommit && firstCommit.sha !== publishOnly[0].sha)
+            ? [firstCommit, ...publishOnly]
+            : publishOnly;
 
         const bar        = document.getElementById('version-bar');
         const slider     = document.getElementById('version-slider');
@@ -286,10 +296,9 @@
         }
 
         // Picks what to diff the current view against. If there's a live draft
-        // since the last publish, diff against that. Otherwise (current text is
-        // identical to the last publish) fall back to showing what that publish
-        // itself changed, comparing it against whatever preceded it in the
-        // file's full history, tagged publish or not.
+        // since the last version, diff against that. Otherwise (current text is
+        // identical to the last version) fall back to showing what that last
+        // version changed relative to the one before it.
         async function getDiffTarget() {
             const lastSha = versions[versions.length - 1].sha;
             await fetchOld(lastSha);
@@ -298,11 +307,10 @@
             if (blockKeys(lastContent) !== blockKeys(currentHTML)) {
                 return { oldHTML: lastContent, newHTML: currentHTML };
             }
-            const idx = commits.findIndex(c => c.sha === lastSha);
-            const prevCommit = idx >= 0 ? commits[idx + 1] : null;
-            if (!prevCommit) return null;
-            await fetchOld(prevCommit.sha);
-            const prevContent = cache[prevCommit.sha];
+            if (versions.length < 2) return null;
+            const prevSha = versions[versions.length - 2].sha;
+            await fetchOld(prevSha);
+            const prevContent = cache[prevSha];
             if (!prevContent || blockKeys(prevContent) === blockKeys(lastContent)) return null;
             return { oldHTML: prevContent, newHTML: lastContent };
         }
