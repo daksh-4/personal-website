@@ -52,12 +52,15 @@ NEW_SCRIPT = r"""<script>
         let commits;
         try {
             const cached = sessionStorage.getItem(cacheKey);
-            if (cached) commits = JSON.parse(cached);
+            const cachedAt = sessionStorage.getItem(cacheKey + '_ts');
+            const fresh = cachedAt && (Date.now() - parseInt(cachedAt, 10)) < 5 * 60 * 1000;
+            if (cached && fresh) commits = JSON.parse(cached);
             else {
                 const res = await fetch(`https://api.github.com/repos/${repo}/commits?path=${filePath}&per_page=100`);
                 if (!res.ok) return;
                 commits = await res.json();
                 sessionStorage.setItem(cacheKey, JSON.stringify(commits));
+                sessionStorage.setItem(cacheKey + '_ts', Date.now().toString());
             }
         } catch (e) { return; }
 
@@ -250,8 +253,8 @@ for fname in sorted(os.listdir(essays_dir)):
     if '#version-bar' not in content and 'version-bar' not in content:
         continue
 
-    # Skip already-updated files (marker = hybrid word-level diff)
-    if 'renderWordDiff' in content:
+    # Skip already-updated files (marker = sessionStorage TTL cache)
+    if "cacheKey + '_ts'" in content:
         print(f'  skip  {fname} (already updated)')
         skipped += 1
         continue

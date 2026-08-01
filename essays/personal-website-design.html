@@ -174,12 +174,15 @@ Essays tab, or go back to the Home tab to read a random essay?
         let commits;
         try {
             const cached = sessionStorage.getItem(cacheKey);
-            if (cached) commits = JSON.parse(cached);
+            const cachedAt = sessionStorage.getItem(cacheKey + '_ts');
+            const fresh = cachedAt && (Date.now() - parseInt(cachedAt, 10)) < 5 * 60 * 1000;
+            if (cached && fresh) commits = JSON.parse(cached);
             else {
                 const res = await fetch(`https://api.github.com/repos/${repo}/commits?path=${filePath}&per_page=100`);
                 if (!res.ok) return;
                 commits = await res.json();
                 sessionStorage.setItem(cacheKey, JSON.stringify(commits));
+                sessionStorage.setItem(cacheKey + '_ts', Date.now().toString());
             }
         } catch (e) { return; }
 
@@ -209,7 +212,7 @@ Essays tab, or go back to the Home tab to read a random essay?
                 diffLabel.style.display = '';
             } else {
                 const v = versions[pos];
-                const msg = v.commit.message.trim().replace(/^publish:\s*/i, '');
+                const msg = v.commit.message.trim().replace(/^publish:\\s*/i, '');
                 label.textContent = fmtDate(v.commit.author.date) + (msg ? ' — ' + msg : '');
                 diffLabel.style.display = 'none';
             }
@@ -220,7 +223,7 @@ Essays tab, or go back to the Home tab to read a random essay?
             d.innerHTML = html;
             return Array.from(d.children).map(el => ({
                 html: el.outerHTML,
-                key:  el.textContent.replace(/\s+/g, ' ').trim()
+                key:  el.textContent.replace(/\\s+/g, ' ').trim()
             })).filter(b => b.key);
         }
 

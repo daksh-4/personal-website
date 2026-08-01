@@ -201,12 +201,15 @@ def create_essay_html(title, content, category=None, date="2026"):
         let commits;
         try {{
             const cached = sessionStorage.getItem(cacheKey);
-            if (cached) commits = JSON.parse(cached);
+            const cachedAt = sessionStorage.getItem(cacheKey + '_ts');
+            const fresh = cachedAt && (Date.now() - parseInt(cachedAt, 10)) < 5 * 60 * 1000;
+            if (cached && fresh) commits = JSON.parse(cached);
             else {{
                 const res = await fetch(`https://api.github.com/repos/${{repo}}/commits?path=${{filePath}}&per_page=100`);
                 if (!res.ok) return;
                 commits = await res.json();
                 sessionStorage.setItem(cacheKey, JSON.stringify(commits));
+                sessionStorage.setItem(cacheKey + '_ts', Date.now().toString());
             }}
         }} catch (e) {{ return; }}
 
