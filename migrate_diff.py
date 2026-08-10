@@ -221,8 +221,9 @@ NEW_SCRIPT = r"""<script>
             byNode.forEach((idxs, node) => {
                 const s = node.nodeValue;
                 const frag = document.createDocumentFragment();
-                let cursor = 0;
-                idxs.forEach(i => {
+                let cursor = 0, k = 0;
+                while (k < idxs.length) {
+                    const i = idxs[k];
                     const t = newTokens[i];
                     if (t.start > cursor) frag.appendChild(document.createTextNode(s.slice(cursor, t.start)));
                     const gone = removedBefore.get(i);
@@ -230,9 +231,24 @@ NEW_SCRIPT = r"""<script>
                         frag.appendChild(makeMark(gone.join(' '), false));
                         frag.appendChild(document.createTextNode(' '));
                     }
-                    frag.appendChild(added[i] ? makeMark(t.word, true) : document.createTextNode(t.word));
-                    cursor = t.end;
-                });
+                    if (added[i]) {
+                        // Extend over adjacent added words so a run highlights as
+                        // one band, gaps included, instead of striping per word.
+                        let k2 = k;
+                        while (k2 + 1 < idxs.length
+                               && added[idxs[k2 + 1]]
+                               && idxs[k2 + 1] === idxs[k2] + 1
+                               && !removedBefore.has(idxs[k2 + 1])) k2++;
+                        const last = newTokens[idxs[k2]];
+                        frag.appendChild(makeMark(s.slice(t.start, last.end), true));
+                        cursor = last.end;
+                        k = k2 + 1;
+                    } else {
+                        frag.appendChild(document.createTextNode(t.word));
+                        cursor = t.end;
+                        k++;
+                    }
+                }
                 if (cursor < s.length) frag.appendChild(document.createTextNode(s.slice(cursor)));
                 node.parentNode.replaceChild(frag, node);
             });
@@ -362,7 +378,7 @@ for fname in sorted(os.listdir(essays_dir)):
     # Skip already-updated files. Checks both the newest feature and the
     # corrected regex escape, so files migrated by an earlier buggy run
     # (which emitted /^publish:\\s*/ instead of /^publish:\s*/) get redone.
-    if 'renderInlineDiff' in content and r'replace(/^publish:\s*/i' in content:
+    if 'one band, gaps included' in content and r'replace(/^publish:\s*/i' in content:
         print(f'  skip  {fname} (already updated)')
         skipped += 1
         continue
