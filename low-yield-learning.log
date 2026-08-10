@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=latex 2025.12.1)  1 AUG 2026 18:24
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=latex 2025.12.1)  11 AUG 2026 00:11
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -806,19 +806,21 @@ Package hyperref Info: Link coloring ON on input line 21.
 
 [1
 
-] (./low-yield-learning.aux)
+]
+
+[2] (./low-yield-learning.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 14422 strings out of 473191
- 211589 string characters out of 5715826
- 732378 words of memory out of 5000000
- 37320 multiletter control sequences out of 15000+600000
- 558837 words of font info for 36 fonts, out of 8000000 for 9000
+ 14451 strings out of 473191
+ 211955 string characters out of 5715826
+ 739402 words of memory out of 5000000
+ 37346 multiletter control sequences out of 15000+600000
+ 559610 words of font info for 39 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 80i,5n,96p,909b,477s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 80i,5n,96p,1966b,474s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on low-yield-learning.dvi (1 page, 14940 bytes).
+Output written on low-yield-learning.dvi (2 pages, 20700 bytes).
