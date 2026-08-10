@@ -222,7 +222,7 @@ Essays tab, or go back to the Home tab to read a random essay?
                 diffLabel.style.display = '';
             } else {
                 const v = versions[pos];
-                const msg = v.commit.message.trim().replace(/^publish:\\s*/i, '');
+                const msg = v.commit.message.trim().replace(/^publish:\s*/i, '');
                 label.textContent = fmtDate(v.commit.author.date) + (msg ? ' — ' + msg : '');
                 diffLabel.style.display = 'none';
             }
@@ -233,7 +233,7 @@ Essays tab, or go back to the Home tab to read a random essay?
             d.innerHTML = html;
             return Array.from(d.children).map(el => ({
                 html: el.outerHTML,
-                key:  el.textContent.replace(/\\s+/g, ' ').trim()
+                key:  el.textContent.replace(/\s+/g, ' ').trim()
             })).filter(b => b.key);
         }
 
@@ -261,8 +261,7 @@ Essays tab, or go back to the Home tab to read a random essay?
 
         function tokenize(text) { return text.split(/\s+/).filter(Boolean); }
 
-        function wordDiff(oldT, newT) {
-            const a = tokenize(oldT), b = tokenize(newT);
+        function wordDiff(a, b) {
             const m = a.length, n = b.length;
             if (m * n > 4000000) return null;
             const dp = Array.from({length: m + 1}, () => new Int32Array(n + 1));
@@ -279,14 +278,95 @@ Essays tab, or go back to the Home tab to read a random essay?
             return ops;
         }
 
-        function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+        function addedBlock(inner) {
+            return '<div style="background:#d4edda;border-radius:3px;padding:0 4px;margin:2px 0;">' + inner + '</div>';
+        }
 
-        function renderWordDiff(ops) {
-            return ops.map(op => {
-                if (op.t === '=') return esc(op.s);
-                if (op.t === '+') return '<mark style="background:#d4edda;text-decoration:none;">' + esc(op.s) + '</mark>';
-                return '<mark style="background:#f8d7da;text-decoration:line-through;color:#721c24;">' + esc(op.s) + '</mark>';
-            }).join(' ');
+        function removedBlock(inner) {
+            return '<div style="background:#f8d7da;color:#721c24;text-decoration:line-through;border-radius:3px;padding:0 4px;margin:2px 0;opacity:0.8;">' + inner + '</div>';
+        }
+
+        function makeMark(text, isAdd) {
+            const el = document.createElement('mark');
+            el.setAttribute('style', isAdd
+                ? 'background:#d4edda;text-decoration:none;'
+                : 'background:#f8d7da;text-decoration:line-through;color:#721c24;');
+            el.textContent = text;
+            return el;
+        }
+
+        function collectTokens(container) {
+            const tokens = [];
+            const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+            let node;
+            while ((node = walker.nextNode())) {
+                const s = node.nodeValue;
+                const re = /\S+/g;
+                let m;
+                while ((m = re.exec(s))) {
+                    tokens.push({ word: m[0], node: node, start: m.index, end: m.index + m[0].length });
+                }
+            }
+            return tokens;
+        }
+
+        // Diffs reworded blocks *in place*. The new blocks keep their own HTML
+        // (headings stay headings, lists stay lists, links and the monospace
+        // spans make4ht emits for \texttt all survive) and only the individual
+        // changed words inside their text nodes get wrapped in a mark.
+        function renderInlineDiff(oldText, insOps) {
+            const container = document.createElement('div');
+            container.innerHTML = insOps.map(op => op.b.html).join('');
+            const newTokens = collectTokens(container);
+            if (!newTokens.length) return null;
+            const ops = wordDiff(tokenize(oldText), newTokens.map(t => t.word));
+            if (!ops) return null;
+
+            const added = new Array(newTokens.length).fill(false);
+            const removedBefore = new Map();
+            let ni = 0;
+            for (const op of ops) {
+                if (op.t === '=') ni++;
+                else if (op.t === '+') { added[ni] = true; ni++; }
+                else {
+                    if (!removedBefore.has(ni)) removedBefore.set(ni, []);
+                    removedBefore.get(ni).push(op.s);
+                }
+            }
+
+            const byNode = new Map();
+            newTokens.forEach((t, i) => {
+                if (!byNode.has(t.node)) byNode.set(t.node, []);
+                byNode.get(t.node).push(i);
+            });
+
+            byNode.forEach((idxs, node) => {
+                const s = node.nodeValue;
+                const frag = document.createDocumentFragment();
+                let cursor = 0;
+                idxs.forEach(i => {
+                    const t = newTokens[i];
+                    if (t.start > cursor) frag.appendChild(document.createTextNode(s.slice(cursor, t.start)));
+                    const gone = removedBefore.get(i);
+                    if (gone) {
+                        frag.appendChild(makeMark(gone.join(' '), false));
+                        frag.appendChild(document.createTextNode(' '));
+                    }
+                    frag.appendChild(added[i] ? makeMark(t.word, true) : document.createTextNode(t.word));
+                    cursor = t.end;
+                });
+                if (cursor < s.length) frag.appendChild(document.createTextNode(s.slice(cursor)));
+                node.parentNode.replaceChild(frag, node);
+            });
+
+            const trailing = removedBefore.get(newTokens.length);
+            if (trailing) {
+                const host = container.lastElementChild || container;
+                host.appendChild(document.createTextNode(' '));
+                host.appendChild(makeMark(trailing.join(' '), false));
+            }
+
+            return container.innerHTML;
         }
 
         function renderBlockDiff(ops) {
@@ -299,16 +379,16 @@ Essays tab, or go back to the Home tab to read a random essay?
                     while (i < ops.length && ops[i].t === '-') { dels.push(ops[i]); i++; }
                     while (i < ops.length && ops[i].t === '+') { ins.push(ops[i]); i++; }
                     if (!dels.length) {
-                        ins.forEach(op => { html += '<div style="background:#d4edda;border-radius:3px;padding:0 4px;margin:2px 0;">' + op.b.html + '</div>'; });
+                        ins.forEach(op => { html += addedBlock(op.b.html); });
                     } else if (!ins.length) {
-                        dels.forEach(op => { html += '<div style="background:#f8d7da;color:#721c24;text-decoration:line-through;border-radius:3px;padding:0 4px;margin:2px 0;opacity:0.8;">' + op.b.html + '</div>'; });
+                        dels.forEach(op => { html += removedBlock(op.b.html); });
                     } else {
-                        const wOps = wordDiff(dels.map(o => o.b.key).join(' '), ins.map(o => o.b.key).join(' '));
-                        if (wOps) {
-                            html += '<p style="margin:4px 0;">' + renderWordDiff(wOps) + '</p>';
+                        const inline = renderInlineDiff(dels.map(o => o.b.key).join(' '), ins);
+                        if (inline) {
+                            html += inline;
                         } else {
-                            dels.forEach(op => { html += '<div style="background:#f8d7da;color:#721c24;text-decoration:line-through;border-radius:3px;padding:0 4px;margin:2px 0;opacity:0.8;">' + op.b.html + '</div>'; });
-                            ins.forEach(op => { html += '<div style="background:#d4edda;border-radius:3px;padding:0 4px;margin:2px 0;">' + op.b.html + '</div>'; });
+                            dels.forEach(op => { html += removedBlock(op.b.html); });
+                            ins.forEach(op => { html += addedBlock(op.b.html); });
                         }
                     }
                 }
@@ -330,27 +410,20 @@ Essays tab, or go back to the Home tab to read a random essay?
         }
 
         function blockKeys(html) {
-            return getBlocks(html).map(b => b.key).join('');
+            return getBlocks(html).map(b => b.key).join('\u0001');
         }
 
-        // Picks what to diff the current view against. If there's a live draft
-        // since the last version, diff against that. Otherwise (current text is
-        // identical to the last version) fall back to showing what that last
-        // version changed relative to the one before it.
+        // Untagged commits made after the most recent publish: are corrections
+        // to that published version, not a version of their own. So the live
+        // page counts as the latest version, and the meaningful comparison is
+        // against the slider stop *before* it. Anchoring on the most recent
+        // publish instead would reduce the diff to whatever typo was fixed last.
         async function getDiffTarget() {
-            const lastSha = versions[versions.length - 1].sha;
-            await fetchOld(lastSha);
-            const lastContent = cache[lastSha];
-            if (!lastContent) return null;
-            if (blockKeys(lastContent) !== blockKeys(currentHTML)) {
-                return { oldHTML: lastContent, newHTML: currentHTML };
-            }
-            if (versions.length < 2) return null;
-            const prevSha = versions[versions.length - 2].sha;
-            await fetchOld(prevSha);
-            const prevContent = cache[prevSha];
-            if (!prevContent || blockKeys(prevContent) === blockKeys(lastContent)) return null;
-            return { oldHTML: prevContent, newHTML: lastContent };
+            const anchor = versions[Math.max(0, versions.length - 2)];
+            await fetchOld(anchor.sha);
+            const oldHTML = cache[anchor.sha];
+            if (!oldHTML || blockKeys(oldHTML) === blockKeys(currentHTML)) return null;
+            return { oldHTML: oldHTML, newHTML: currentHTML };
         }
 
         async function showContent(pos) {
