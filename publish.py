@@ -20,6 +20,7 @@ def get_frontmatter(text, is_tex=False):
     category = None
     nodes = []
     links = []
+    unlisted = False
 
     if is_tex:
         frontmatter_match = re.search(r'^%\s*---\n(.*?)^%\s*---', text, flags=re.MULTILINE | re.DOTALL)
@@ -45,7 +46,13 @@ def get_frontmatter(text, is_tex=False):
 
             m = re.search(r'^%[ \t]*category:[ \t]*(.+)$', fm, flags=re.MULTILINE)
             if m: category = m.group(1).strip() or None
-    return title, date, category, nodes, links
+
+            # An unlisted essay is compiled and published like any other, but
+            # is kept out of essays.json, so it appears in neither the list
+            # view nor the graph view. Reachable only by direct link.
+            m = re.search(r'^%[ \t]*unlisted:[ \t]*(.+)$', fm, flags=re.MULTILINE)
+            if m: unlisted = m.group(1).strip().lower() in ('true', 'yes', '1')
+    return title, date, category, nodes, links, unlisted
 
 def markdown_to_html(md_text):
     # Minimal stub since original was long. We will just preserve basic markdown
@@ -108,13 +115,14 @@ def filename_from_title(title):
     clean = re.sub(r'[^a-zA-Z0-9 ]', '', title.lower())
     return clean.replace(' ', '-') + '.html'
 
-def create_essay_html(title, content, category=None, date="2026"):
+def create_essay_html(title, content, category=None, date="2026", unlisted=False):
     category_meta = f'\n    <meta name="category" content="{category}">' if category else ''
+    robots_meta = '\n    <meta name="robots" content="noindex, nofollow">' if unlisted else ''
     return f'''<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">{category_meta}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">{category_meta}{robots_meta}
     <title>{title} - Daksh Mehta</title>
     <!-- MathJax for rendering math -->
     <script>
@@ -519,7 +527,7 @@ def main():
     with open(input_file, 'r', encoding='utf-8') as f:
         content = f.read()
 
-    title, date, category, nodes, links = get_frontmatter(content, is_tex=is_tex)
+    title, date, category, nodes, links, unlisted = get_frontmatter(content, is_tex=is_tex)
     
     if not title:
         title = title_from_filename(input_file)
@@ -532,7 +540,7 @@ def main():
     else:
         html_content, category = markdown_to_html(content)
         
-    full_html = create_essay_html(title, html_content, category=category, date=date)
+    full_html = create_essay_html(title, html_content, category=category, date=date, unlisted=unlisted)
     
     output_filename = filename_from_title(title)
     output_file = Path('essays') / output_filename
@@ -553,23 +561,27 @@ def main():
     else:
         essays = []
         
-    # Update entry if exists, else append
-    essay_data = {
-        "title": title,
-        "url": f"essays/{output_filename}",
-        "date": date,
-        "category": category or "",
-        "nodes": nodes,
-        "links": links
-    }
-    
-    # Remove old entry matching the url
-    essays = [e for e in essays if e.get("url") != essay_data["url"]]
-    essays.append(essay_data)
+    essay_url = f"essays/{output_filename}"
+
+    # Always drop any existing entry for this url first, so flipping an essay
+    # to unlisted removes it from the listing on the next publish.
+    essays = [e for e in essays if e.get("url") != essay_url]
+
+    if not unlisted:
+        essays.append({
+            "title": title,
+            "url": essay_url,
+            "date": date,
+            "category": category or "",
+            "nodes": nodes,
+            "links": links
+        })
     
     with open(essays_json_path, 'w', encoding='utf-8') as f:
         json.dump(essays, f, indent=4)
 
+    if unlisted:
+        print(f"  unlisted: kept out of essays.json (no list view, no graph view)")
     print(f"✓ Updated essays.json metadata network")
 
     # Embed essays data directly in articles.html so it works without a server
