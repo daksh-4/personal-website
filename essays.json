@@ -115,16 +115,6 @@
         "links": []
     },
     {
-        "title": "Handwritten medicine MCQs",
-        "url": "essays/handwritten-medicine-mcqs.html",
-        "date": "2026-09",
-        "category": "",
-        "nodes": [
-            "Tools"
-        ],
-        "links": []
-    },
-    {
         "title": "What it was like writing my thesis",
         "url": "essays/what-it-was-like-writing-my-thesis.html",
         "date": "2026-08",
@@ -135,5 +125,15 @@
         "links": [
             "essays/three-terms-in-cambridge.html"
         ]
+    },
+    {
+        "title": "Handwritten Medicine MCQs",
+        "url": "essays/handwritten-medicine-mcqs.html",
+        "date": "2026-09",
+        "category": "",
+        "nodes": [
+            "Tools"
+        ],
+        "links": []
     }
 ]
