@@ -78,7 +78,10 @@ def latex_to_html_make4ht(input_file):
     with tempfile.TemporaryDirectory() as tmpdir:
         # Run make4ht
         print(f"Running make4ht on {input_file}...")
-        result = subprocess.run(["make4ht", "-u", input_file, "-d", tmpdir], capture_output=True, text=True)
+        # "fn-in" keeps footnotes in the same output file. Without it tex4ht
+        # splits them into a second page (e.g. essay2.html) that this pipeline
+        # discards, losing the footnote text and leaving a link to a 404.
+        result = subprocess.run(["make4ht", "-u", input_file, "-d", tmpdir, "fn-in"], capture_output=True, text=True)
         if result.returncode != 0:
             print("make4ht error:\n" + result.stderr)
         
