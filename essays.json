@@ -135,5 +135,15 @@
             "Tools"
         ],
         "links": []
+    },
+    {
+        "title": "Bias and Precision",
+        "url": "essays/bias-and-precision.html",
+        "date": "2026-11",
+        "category": "",
+        "nodes": [
+            "Reading"
+        ],
+        "links": []
     }
 ]
