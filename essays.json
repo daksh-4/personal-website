@@ -105,16 +105,6 @@
         ]
     },
     {
-        "title": "Low Yield Learning",
-        "url": "essays/low-yield-learning.html",
-        "date": "2026-08",
-        "category": "",
-        "nodes": [
-            "Reflections"
-        ],
-        "links": []
-    },
-    {
         "title": "What it was like writing my thesis",
         "url": "essays/what-it-was-like-writing-my-thesis.html",
         "date": "2026-08",
@@ -143,6 +133,16 @@
         "category": "",
         "nodes": [
             "Reading"
+        ],
+        "links": []
+    },
+    {
+        "title": "Low Yield Learning",
+        "url": "essays/low-yield-learning.html",
+        "date": "2026-08",
+        "category": "",
+        "nodes": [
+            "Reflections"
         ],
         "links": []
     }
