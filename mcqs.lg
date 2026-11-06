@@ -1,3 +1,6 @@
+htfcss: cmbx  font-weight: bold;
+htfcss: cmbxsl  font-weight: bold; font-style: oblique;
+htfcss: cmtt font-family: monospace,monospace;
 htfcss: cmmi font-style: italic;
 htfcss: cmmib font-style: italic; font-weight: bold;
 File: mcqs.html
@@ -161,3 +164,5 @@ Css: .rotatebox{display: inline-block;}
 --- characters ---
 Font("cmr","10","10","100")
 Font("cmmi","10","10","100")
+Font("cmtt","10","10","100")
+Font("cmbx","10","10","100")

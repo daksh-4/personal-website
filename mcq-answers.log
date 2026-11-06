@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=latex 2025.12.1)  10 OCT 2026 10:33
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=latex 2025.12.1)  6 NOV 2026 22:05
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -806,19 +806,21 @@ Package hyperref Info: Link coloring ON on input line 22.
 
 ]
 
-[2] (./mcq-answers.aux)
+[2]
+
+[3] (./mcq-answers.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 14480 strings out of 473191
- 212208 string characters out of 5715826
+ 14483 strings out of 473191
+ 212244 string characters out of 5715826
  738926 words of memory out of 5000000
- 37372 multiletter control sequences out of 15000+600000
+ 37375 multiletter control sequences out of 15000+600000
  559918 words of font info for 40 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  80i,5n,96p,1132b,474s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on mcq-answers.dvi (2 pages, 22308 bytes).
+Output written on mcq-answers.dvi (3 pages, 24388 bytes).
