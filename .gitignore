@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store
+
+# Debris tex4ht/make4ht leaves in the repo root while building an essay.
+# publish.py removes these after every build; this is the safety net for a
+# build that gets killed part way. Top-level *.html and *.css are deliberately
+# NOT listed, so a real page added there (e.g. 404.html) is never skipped.
+/*.4ct
+/*.4tc
+/*.aux
+/*.dvi
+/*.idv
+/*.lg
+/*.log
+/*.tmp
+/*.xref
+/*[0-9]x.png
+
+# TeXstudio / latexmk output next to the drafts. The site is built from the
+# .tex files and never uses these. A file that is already tracked stays
+# tracked; to commit a new PDF on purpose use: git add -f drafts/name.pdf
+drafts/*.aux
+drafts/*.log
+drafts/*.out
+drafts/*.fls
+drafts/*.fdb_latexmk
+drafts/*.synctex.gz
+drafts/*.pdf

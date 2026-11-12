@@ -75,6 +75,23 @@ def markdown_to_html(md_text):
     return '\n<br>\n'.join(blocks), category
 
 def latex_to_html_make4ht(input_file):
+    # make4ht writes its intermediate files (.4ct, .aux, .dvi, .log, a stray copy
+    # of the .html and .css, any rasterised images) into the directory it is run
+    # from, not into the -d output dir. Remember what is there beforehand so that
+    # whatever this run adds can be removed afterwards, even if the build fails.
+    # Only files named after this essay are touched, and only ones that did not
+    # exist before, so nothing of yours is ever deleted.
+    stem = Path(input_file).stem
+    before = set(os.listdir('.'))
+    try:
+        return _run_make4ht(input_file)
+    finally:
+        for name in set(os.listdir('.')) - before:
+            if name.startswith(stem) and os.path.isfile(name):
+                try: os.remove(name)
+                except OSError: pass
+
+def _run_make4ht(input_file):
     with tempfile.TemporaryDirectory() as tmpdir:
         # Run make4ht
         print(f"Running make4ht on {input_file}...")
