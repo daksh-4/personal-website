@@ -609,5 +609,11 @@ def main():
             f.write(updated)
         print(f"✓ Embedded essay data into articles.html")
 
+    # Refresh the "Recently updated" list on the home page. A subprocess, so a
+    # problem there can never stop a publish.
+    feed_script = Path(__file__).with_name('update_feed.py')
+    if feed_script.exists():
+        subprocess.run([sys.executable, str(feed_script)])
+
 if __name__ == '__main__':
     main()
