@@ -1,0 +1,149 @@
+% ---
+% title: Bias and Precision
+% date: 2026-11
+% category:
+% nodes: reading 
+% links: 
+% ---
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+
+\geometry{a4paper, margin=1in}
+
+\title{Bias and Precision}
+\date{November 2026}
+\author{Daksh Mehta}
+
+\begin{document}
+	
+This essay is derived from topics I found challenging to wrap my head around during my MPhil. 
+
+What does it mean to be biased? In everyday english, we might describe a weighing scale as biased and in doing so we are trying to capture something about the way it measures things. When a measurement is off, it is important from an experimental point of view to establish why that is. 
+
+Measuring devices are not perfect and so there tends to be a natural spread around the true value of the thing you are trying to measure. We can take lots of measurements of the same item and settle on a number which describes to us the "average" recording that our device gives. This is called the expectation $E[\hat{\theta}]$ where $\hat{\theta}$ is our set of possible outputs of the device and their respective probabilities of showing up. We can call a device biased when $E[\hat{\theta}]$ is not equal to $\theta$ which is the true value of the thing we are trying to measure. 
+
+There are some other properties of measuring devices which follow naturally from these concepts. Starting with the variance $E[(\hat{\theta}-E[\hat{\theta}])^2]$ which tells us the spread of the estimates around their own average. It can also be written equivalently as $E[\hat{\theta}^2]-E[\hat{\theta}]^2$, revealing to us that variance is measured relative to the average of the estimates, not relative to the truth. If every estimate were shifted by ten units, the variance would not change at all. 
+
+The quantity that does see both is the mean squared error $E[(\hat{\theta}-\theta)^2]$. With some mathematical juggling we can show that mean squared error is equal to the variance added to the squared bias \footnote{
+	\begin{align*}
+	\mathrm{MSE}(\hat\theta) &= \mathbb{E}\!\left[(\hat\theta-\theta)^2\right]
+	&& \text{(definition)}\\[4pt]
+	&= \mathbb{E}\!\left[\Big(\big(\hat\theta-\mathbb{E}[\hat\theta]\big)
+	+ \big(\mathbb{E}[\hat\theta]-\theta\big)\Big)^{2}\right]
+	&& \text{(add and subtract } \mathbb{E}[\hat\theta]\text{)}\\[4pt]
+	&= \mathbb{E}\!\left[\big(\hat\theta-\mathbb{E}[\hat\theta]\big)^2\right]
+	+ 2\,\big(\mathbb{E}[\hat\theta]-\theta\big)\,
+	\mathbb{E}\!\left[\hat\theta-\mathbb{E}[\hat\theta]\right]
+	+ \big(\mathbb{E}[\hat\theta]-\theta\big)^2
+	&& \text{(expand; the constant } \mathbb{E}[\hat\theta]-\theta \text{ factors out)}\\[4pt]
+	&= \mathrm{Var}(\hat\theta) + 0 + \mathrm{Bias}(\hat\theta)^2
+	&& \text{(since } \mathbb{E}\!\left[\hat\theta-\mathbb{E}[\hat\theta]\right]=0\text{)}\\[4pt]
+	&= \mathrm{Var}(\hat\theta) + \mathrm{Bias}(\hat\theta)^2,
+	\qquad \mathrm{Bias}(\hat\theta)=\mathbb{E}[\hat\theta]-\theta .
+\end{align*}
+}. In simple terms, the total error is the sum of a scatter component and a shift component.
+
+How can we deal with noisy devices? A natural response to a noisy device is to measure many times and average. If $n$ independent measurements each have variance $\sigma^2$, their average $\bar{\theta}$ has variance $\sigma^2/n$, and the square root of this is the standard error of the mean (SEM):
+\begin{equation*}
+	\mathrm{Var}(\bar{\theta}) = \frac{\sigma^2}{n}, \qquad \mathrm{SEM} = \frac{\sigma}{\sqrt{n}} .
+\end{equation*}
+The standard error shrinks as we collect more data and it tells us how tightly the sample average pins down $E[\hat{\theta}]$. It says nothing about the distance between $E[\hat{\theta}]$ and the truth. Averaging leaves the bias untouched, since $E[\bar{\theta}] = E[\hat{\theta}]$, so the mean squared error of the average is
+\begin{equation*}
+	\mathrm{MSE}(\bar{\theta}) = \frac{\sigma^2}{n} + \mathrm{Bias}(\hat{\theta})^2
+	\;\longrightarrow\; \mathrm{Bias}(\hat{\theta})^2 \qquad (n \to \infty).
+\end{equation*}
+More data makes the standard error vanish, but the error settles at the squared bias. We can become more and more confident in a number that is still wrong. 
+
+Bias is not always something to remove. Suppose we want to judge a person's height from a blurry photo. The photo gives a reading $x = \theta + \varepsilon$, where $\theta$ is the true height and the noise $\varepsilon$ has mean zero and standard deviation $\sigma = 10$ cm. We also know something before we look at the photo: people in this population are usually around $\mu = 170$ cm, and true heights typically sit a distance $\tau$ from that average (formally, $E[(\mu-\theta)^2]=\tau^2$). If the photo reads 180 cm, taking it at face value is not obviously the best guess. A reading well above average is more likely to be an ordinary person plus some upward noise than a genuinely tall person, so a better guess pulls the reading part of the way back towards 170.
+
+One simple way to do this is a weighted average of the reading and the expected value,
+\begin{equation*}
+	\hat{\theta}_\lambda = \lambda x + (1-\lambda)\mu, \qquad 0 \le \lambda \le 1 ,
+\end{equation*}
+where $\lambda$ is a dial. At $\lambda = 1$ we take the reading as it is. At $\lambda = 0$ we ignore it and always answer $\mu$. At $\lambda = 0.5$ a reading of 180 becomes 175.
+
+Take a person whose true height is $\theta = 180$ and set $\lambda = 0.5$. On average the estimate is $0.5\times 180 + 0.5\times 170 = 175$, which is 5 cm too low. In general,
+\begin{equation*}
+	\mathrm{Bias} = (1-\lambda)(\mu-\theta), \qquad
+	\mathrm{Var} = \lambda^2\sigma^2, \qquad
+	\mathrm{MSE}_\theta = \lambda^2\sigma^2 + (1-\lambda)^2(\mu-\theta)^2 .
+\end{equation*}
+The bias is the fraction $1-\lambda$ of the distance from the truth to $\mu$. The variance is $\lambda^2\sigma^2$ because the noise only enters through $x$, which now counts for a fraction $\lambda$ of the answer. With our numbers the variance falls from $100$ to $25$ and the bias is $-5$, so
+$\mathrm{MSE}_\theta = 25 + 25 = 50$, against $100$ for the unbiased reading ($\lambda = 1$).
+
+For a person who is exactly average ($\theta = 170$) the bias is zero and the error is only $25$. For a very tall person ($\theta = 200$) the bias is $-15$ and the error is $25 + 225 = 250$, worse than trusting the photo. With these numbers pulling towards $\mu$ wins only when the true height is within about $17$ cm of the average. Since we do not know $\theta$ in advance, the pull is a bet that the true value is near what we expect.
+
+We can judge the bet by averaging over the values we expect to meet, for which $E[(\mu-\theta)^2]=\tau^2$:
+\begin{equation*}
+	\overline{\mathrm{MSE}}(\lambda) = \lambda^2\sigma^2 + (1-\lambda)^2\tau^2 .
+\end{equation*}
+The first term falls as $\lambda$ shrinks and the second rises, so some intermediate dial setting is best. It is smallest when\footnote{
+	\begin{align*}
+		\frac{d}{d\lambda}\overline{\mathrm{MSE}}
+		&= 2\lambda\sigma^2 - 2(1-\lambda)\tau^2 = 0
+		\;\Rightarrow\; \lambda^\ast = \frac{\tau^2}{\sigma^2+\tau^2},
+		\qquad 1-\lambda^\ast = \frac{\sigma^2}{\sigma^2+\tau^2},\\[4pt]
+		\overline{\mathrm{MSE}}(\lambda^\ast)
+		&= \frac{\tau^4\sigma^2 + \sigma^4\tau^2}{(\sigma^2+\tau^2)^2}
+		= \frac{\sigma^2\tau^2}{\sigma^2+\tau^2}.
+	\end{align*}
+}
+\begin{equation*}
+	\lambda^\ast = \frac{\tau^2}{\sigma^2+\tau^2} = \frac{1/\sigma^2}{1/\sigma^2 + 1/\tau^2},
+	\qquad
+	\overline{\mathrm{MSE}}(\lambda^\ast) = \frac{\sigma^2\tau^2}{\sigma^2+\tau^2} < \sigma^2 .
+\end{equation*}
+The best blend weights the reading and the expectation by their precisions, the inverse of their variances. If the photo is as noisy as people are varied ($\sigma = \tau = 10$), the weights are equal, $\lambda^\ast = 0.5$, and the average error is $50$ instead of $100$. If the photo is noisy but people are all much alike ($\sigma = 10$, $\tau = 5$), we should lean mostly on the average: $\lambda^\ast = 0.2$ and the error is $20$. When the noise and the spread of true values are both Gaussian, this blend is exactly the posterior mean of Bayesian inference. The advantage holds on average over the values we expect to meet, not at every $\theta$: for the very tall person above, the unbiased reading does better.
+
+Because $1-\lambda^\ast = \sigma^2/(\sigma^2+\tau^2)$, the bias this estimator accepts is
+\begin{equation*}
+	|\mathrm{Bias}| = \frac{\sigma^2}{\sigma^2+\tau^2}\,|\mu-\theta| .
+\end{equation*}
+With $\tau = 10$, a photo with $\sigma = 2$ is pulled by only about $4\%$ of the distance to $\mu$, one with $\sigma = 10$ by $50\%$, and one with $\sigma = 30$ by $90\%$. Bias and precision are separate properties of a device, but an estimator that uses its evidence sensibly couples them: the noisier the evidence, the more it leans on what it expects, and the more it is biased towards that expectation. This is regression to the mean.
+
+That coupling exists only if the estimator knows how reliable the evidence is on this occasion. Suppose it keeps a fixed dial $\lambda_0 = 0.5$, tuned for $\sigma = 10$, while the photos change quality. Since $\overline{\mathrm{MSE}}(\lambda)$ is a quadratic in $\lambda$ with its minimum at $\lambda^\ast$,\footnote{
+	Expanding, $\overline{\mathrm{MSE}}(\lambda) = (\sigma^2+\tau^2)\lambda^2 - 2\tau^2\lambda + \tau^2$, and completing the square gives $(\sigma^2+\tau^2)(\lambda-\lambda^\ast)^2 + \sigma^2\tau^2/(\sigma^2+\tau^2)$.
+}
+\begin{equation*}
+	\overline{\mathrm{MSE}}(\lambda_0) = \overline{\mathrm{MSE}}(\lambda^\ast)
+	+ (\sigma^2+\tau^2)\,(\lambda_0-\lambda^\ast)^2 ,
+\end{equation*}
+so the excess error grows with the square of the miscalibration. The table shows both ways to get it wrong, with $\tau = 10$.
+
+\begin{center}
+	\begin{tabular}{llrrr}
+		\hline
+		True noise $\sigma$ & Dial & Variance & Bias$^2$ & Total \\
+		\hline
+		30 (noisier than assumed) & fixed, $\lambda_0 = 0.5$ & 225 & 25 & 250 \\
+		30 & adapted, $\lambda^\ast = 0.1$ & 9 & 81 & 90 \\
+		\hline
+		2 (cleaner than assumed) & fixed, $\lambda_0 = 0.5$ & 1 & 25 & 26 \\
+		2 & adapted, $\lambda^\ast \approx 0.96$ & 3.7 & 0.1 & 3.8 \\
+		\hline
+	\end{tabular}
+\end{center}
+
+If the measurement is noisier than assumed, the fixed estimator trusts it too much and pays in variance. If it is cleaner than assumed, the estimator shrinks too much and pays in bias. In this simple model, a change in measurement quality that goes unnoticed changes the variance but leaves the bias fixed at $(1-\lambda_0)(\mu-\theta)$, while an estimator that is told about the change adjusts its bias on purpose.
+
+Not every change in a measurement is noise. Suppose something shifts the measurement itself, so that $x = \theta + \delta + \varepsilon$ with $\delta$ a systematic distortion, for example a lens that makes everyone look $5$ cm taller. An estimator that does not know about $\delta$ treats it as signal, and the distortion passes straight into its bias:
+\begin{equation*}
+	E[\hat{\theta}_\lambda] - \theta = \lambda\delta + (1-\lambda)(\mu-\theta).
+\end{equation*}
+An estimator that knows $\delta$, or can infer it, subtracts it, using $\hat{\theta}_\lambda = \lambda(x-\delta) + (1-\lambda)\mu$, and the extra term $\lambda\delta$ disappears. Knowing why the measurement changed removes the bias that the change would otherwise cause. A change that only widens the noise is different: it cannot move the average of the measurements, only their spread.
+
+Finally, whether an estimator is biased depends on the scale on which we judge it. Let $V$ be the usual sample variance (with $n-1$ in the denominator), which is unbiased for $\sigma^2$, so $E[V]=\sigma^2$. Its square root $s=\sqrt{V}$, the sample standard deviation, is not unbiased for $\sigma$. Because the square root is concave, Jensen's inequality gives
+\begin{equation*}
+	E[s] = E\!\left[\sqrt{V}\right] \le \sqrt{E[V]} = \sigma ,
+\end{equation*}
+with strict inequality unless $V$ is constant. More generally, $E[f(X)] \neq f(E[X])$ whenever $f$ is curved. An estimator that is unbiased on one scale is therefore generally biased on another, so bias is a property of an estimator together with the scale it is judged on.
+
+Bias and precision are two separate axes of error, and the standard summaries of spread see only one of them. A standard error shrinks with more data whether or not the estimate is right. Bias can be a deliberate trade for lower total error, in which case it tracks the estimator's own knowledge of how reliable its evidence is. And a change in the quality of evidence need not produce a bias, provided the estimator can account for why it changed.
+
+
+
+\end{document}

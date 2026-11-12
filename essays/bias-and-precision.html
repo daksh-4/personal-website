@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bias and Precision - Daksh Mehta</title>
+    <!-- MathJax for rendering math -->
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        }
+      };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: Verdana, Geneva, sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #000;
+            background-color: #f6f6ef;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2, h3, h4 { font-weight: bold; margin-bottom: 20px; margin-top: 30px; }
+        h1 { font-size: 20px; }
+        h2 { font-size: 18px; }
+        h3 { font-size: 16px; }
+        a { color: #000; text-decoration: underline; }
+        a:hover { color: #666; }
+        .date { color: #666; font-size: 12px; margin-bottom: 20px; }
+        .footer { margin-top: 50px; font-size: 12px; color: #666; border-top: 1px solid #ccc; padding-top: 20px; }
+        .nav { margin-bottom: 30px; }
+        .nav a { margin-right: 15px; }
+        .content { transition: opacity 0.15s ease; }
+        #version-bar { margin-bottom: 30px; display: none; }
+        #version-bar input[type=range] {
+            width: 100%;
+            margin: 0 0 6px 0;
+            accent-color: #333;
+            cursor: pointer;
+        }
+        #version-label {
+            font-size: 11px;
+            color: #888;
+        }
+        ins.vc-add { background: #d4edda; text-decoration: none; border-radius: 2px; padding: 0 1px; }
+        del.vc-del { background: #f8d7da; color: #721c24; text-decoration: line-through; border-radius: 2px; padding: 0 1px; }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="../index.html">Home</a>
+        <a href="../articles.html">Essays</a>
+        <a href="../about.html">About</a>
+    </div>
+
+    <h1>Bias and Precision</h1>
+    <div class="date">2026-11</div>
+
+    <div id="version-bar">
+        <input type="range" id="version-slider" min="0" max="0" value="0" step="1">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
+            <div id="version-label"></div>
+            <label id="diff-label" style="display:none;font-size:11px;color:#888;cursor:pointer;user-select:none;"><input type="checkbox" id="diff-toggle" style="margin-right:4px;cursor:pointer;">highlight changes</label>
+        </div>
+    </div>
+
+    <div class="content">
+        
+<!-- l. 23 --><p class='noindent'>This essay is derived from topics I found challenging to wrap my head around during my MPhil.
+</p><!-- l. 25 --><p class='indent'>   What does it mean to be biased? In everyday english, we might describe a weighing scale as
+biased and in doing so we are trying to capture something about the way it measures things. When
+a measurement is off, it is important from an experimental point of view to establish why that
+is.
+</p><!-- l. 27 --><p class='indent'>   Measuring devices are not perfect and so there tends to be a natural spread around the true value of the
+thing you are trying to measure. We can take lots of measurements of the same item and settle on a number
+which describes to us the ”average” recording that our device gives. This is called the expectation
+<!-- l. 27 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>E</mi><mo class='MathClass-open' stretchy='false'>[</mo><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover><mo class='MathClass-close' stretchy='false'>]</mo></mrow></math> where
+<!-- l. 27 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover></math> is our set of
+possible outputs of the device and their respective probabilities of showing up. We can call a device biased when
+<!-- l. 27 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>E</mi><mo class='MathClass-open' stretchy='false'>[</mo><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover><mo class='MathClass-close' stretchy='false'>]</mo></mrow></math> is not
+equal to <!-- l. 27 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mi>𝜃</mi></math>
+which is the true value of the thing we are trying to measure.
+</p><!-- l. 29 --><p class='indent'>   There are some other properties of measuring devices which follow naturally from these concepts. Starting with
+the variance <!-- l. 29 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>E</mi><mo class='MathClass-open' stretchy='false'>[</mo><msup><mrow><mo class='MathClass-open' stretchy='false'>(</mo><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover> <mo class='MathClass-bin' stretchy='false'>−</mo> <mi>E</mi><mo class='MathClass-open' stretchy='false'>[</mo><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover><mo class='MathClass-close' stretchy='false'>]</mo><mo class='MathClass-close' stretchy='false'>)</mo></mrow><mrow><mn>2</mn></mrow></msup><mo class='MathClass-close' stretchy='false'>]</mo></mrow></math>
+which tells us the spread of the estimates around their own average. It can also be written equivalently as
+<!-- l. 29 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>E</mi><mo class='MathClass-open' stretchy='false'>[</mo><msup><mrow><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover></mrow><mrow><mn>2</mn></mrow></msup><mo class='MathClass-close' stretchy='false'>]</mo> <mo class='MathClass-bin' stretchy='false'>−</mo> <mi>E</mi><msup><mrow><mo class='MathClass-open' stretchy='false'>[</mo><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover><mo class='MathClass-close' stretchy='false'>]</mo></mrow><mrow><mn>2</mn></mrow></msup></mrow></math>,
+revealing to us that variance is measured relative to the average of the estimates, not relative to the truth. If
+every estimate were shifted by ten units, the variance would not change at all.
+</p><!-- l. 31 --><p class='indent'>   The quantity that does see both is the mean squared error
+<!-- l. 31 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>E</mi><mo class='MathClass-open' stretchy='false'>[</mo><msup><mrow><mo class='MathClass-open' stretchy='false'>(</mo><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover> <mo class='MathClass-bin' stretchy='false'>−</mo> <mi>𝜃</mi><mo class='MathClass-close' stretchy='false'>)</mo></mrow><mrow><mn>2</mn></mrow></msup><mo class='MathClass-close' stretchy='false'>]</mo></mrow></math>. With
+                                                                                      
+some mathematical juggling we can show that mean squared error is equal to the variance added to the squared
+bias <span class='footnote-mark'><a href='#fn1x0' id='fn1x0-bk'><sup class='textsuperscript'>1</sup></a></span><a id='x1-2f1'></a>.
+In simple terms, the total error is the sum of a scatter component and a shift component.
+</p><!-- l. 50 --><p class='noindent'>How can we deal with noisy devices? A natural response to a noisy device is to measure many times and average. If
+<!-- l. 50 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mi>n</mi></math> independent measurements
+each have variance <!-- l. 50 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup></math>,
+their average <!-- l. 50 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>¯</mo></mover></math>
+has variance <!-- l. 50 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup><mo class='MathClass-bin' stretchy='false'>∕</mo><mi>n</mi></mrow></math>,
+and the square root of this is the standard error of the mean (SEM): </p><table class='equation-star'><tr><td>
+<!-- l. 51 --><math class='equation' display='block' xmlns='http://www.w3.org/1998/Math/MathML'><mrow>
+                                <mstyle mathvariant='normal'><mi>Var</mi></mstyle><mo class='MathClass-open' stretchy='false'>(</mo><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>¯</mo></mover><mo class='MathClass-close' stretchy='false'>)</mo> <mo class='MathClass-rel' stretchy='false'>=</mo> <mfrac><mrow><msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup></mrow> 
+ <mrow><mi>n</mi></mrow></mfrac> <mo class='MathClass-punc' stretchy='false'>,</mo><mspace class='qquad' width='2em'></mspace><mstyle mathvariant='normal'><mi>SEM</mi></mstyle> <mo class='MathClass-rel' stretchy='false'>=</mo>  <mfrac><mrow><mi>σ</mi></mrow> 
+<mrow><msqrt><mrow><mi>n</mi></mrow></msqrt></mrow></mfrac><mo class='MathClass-punc' stretchy='false'>.</mo>
+</mrow></math></td></tr></table>
+<!-- l. 54 --><p class='indent'>   The standard error shrinks as we collect more data and it tells us how tightly the sample average pins down
+<!-- l. 54 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>E</mi><mo class='MathClass-open' stretchy='false'>[</mo><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover><mo class='MathClass-close' stretchy='false'>]</mo></mrow></math>. It says nothing about the distance
+between <!-- l. 54 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>E</mi><mo class='MathClass-open' stretchy='false'>[</mo><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover><mo class='MathClass-close' stretchy='false'>]</mo></mrow></math> and the truth. Averaging
+leaves the bias untouched, since <!-- l. 54 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>E</mi><mo class='MathClass-open' stretchy='false'>[</mo><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>¯</mo></mover><mo class='MathClass-close' stretchy='false'>]</mo> <mo class='MathClass-rel' stretchy='false'>=</mo> <mi>E</mi><mo class='MathClass-open' stretchy='false'>[</mo><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover><mo class='MathClass-close' stretchy='false'>]</mo></mrow></math>,
+so the mean squared error of the average is </p><table class='equation-star'><tr><td>
+<!-- l. 55 --><math class='equation' display='block' xmlns='http://www.w3.org/1998/Math/MathML'><mrow>
+                       <mstyle mathvariant='normal'><mi>MSE</mi></mstyle><mo class='MathClass-open' stretchy='false'>(</mo><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>¯</mo></mover><mo class='MathClass-close' stretchy='false'>)</mo> <mo class='MathClass-rel' stretchy='false'>=</mo> <mfrac><mrow><msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup></mrow> 
+ <mrow><mi>n</mi></mrow></mfrac> <mo class='MathClass-bin' stretchy='false'>+</mo> <mstyle mathvariant='normal'><mi>Bias</mi></mstyle><msup><mrow><mo class='MathClass-open' stretchy='false'>(</mo><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover><mo class='MathClass-close' stretchy='false'>)</mo></mrow><mrow><mn>2</mn></mrow></msup><mspace class='thickpace' width='0.28em'></mspace><mo class='MathClass-rel' stretchy='false'>→</mo><mspace class='thickpace' width='0.28em'></mspace><mstyle mathvariant='normal'><mi>Bias</mi></mstyle><msup><mrow><mo class='MathClass-open' stretchy='false'>(</mo><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover><mo class='MathClass-close' stretchy='false'>)</mo></mrow><mrow><mn>2</mn></mrow></msup><mspace class='qquad' width='2em'></mspace><mo class='MathClass-open' stretchy='false'>(</mo><mi>n</mi> <mo class='MathClass-rel' stretchy='false'>→</mo><mi>∞</mi><mo class='MathClass-close' stretchy='false'>)</mo><mo class='MathClass-punc' stretchy='false'>.</mo>
+</mrow></math></td></tr></table>
+<!-- l. 59 --><p class='indent'>   More data makes the standard error vanish, but the error settles at the squared bias. We can become more
+and more confident in a number that is still wrong.
+</p><!-- l. 61 --><p class='indent'>   Bias is not always something to remove. Suppose we want to judge a person’s height from a blurry photo. The photo gives
+a reading <!-- l. 61 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>x</mi> <mo class='MathClass-rel' stretchy='false'>=</mo> <mi>𝜃</mi> <mo class='MathClass-bin' stretchy='false'>+</mo> <mi>𝜀</mi></mrow></math>, where
+<!-- l. 61 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mi>𝜃</mi></math> is the true height and
+the noise <!-- l. 61 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mi>𝜀</mi></math> has mean zero
+and standard deviation <!-- l. 61 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>σ</mi> <mo class='MathClass-rel' stretchy='false'>=</mo> <mn>10</mn></mrow></math>
+cm. We also know something before we look at the photo: people in this population are usually around
+<!-- l. 61 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>μ</mi> <mo class='MathClass-rel' stretchy='false'>=</mo> <mn>170</mn></mrow></math> cm, and true heights
+typically sit a distance <!-- l. 61 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mi>τ</mi></math> from
+that average (formally, <!-- l. 61 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>E</mi><mo class='MathClass-open' stretchy='false'>[</mo><msup><mrow><mo class='MathClass-open' stretchy='false'>(</mo><mi>μ</mi> <mo class='MathClass-bin' stretchy='false'>−</mo> <mi>𝜃</mi><mo class='MathClass-close' stretchy='false'>)</mo></mrow><mrow><mn>2</mn></mrow></msup><mo class='MathClass-close' stretchy='false'>]</mo> <mo class='MathClass-rel' stretchy='false'>=</mo> <msup><mrow><mi>τ</mi></mrow><mrow><mn>2</mn></mrow></msup></mrow></math>).
+If the photo reads 180 cm, taking it at face value is not obviously the best guess. A reading well above average is
+more likely to be an ordinary person plus some upward noise than a genuinely tall person, so a better guess
+pulls the reading part of the way back towards 170.
+</p><!-- l. 63 --><p class='indent'>   One simple way to do this is a weighted average of the reading and the expected value, </p><table class='equation-star'><tr><td>
+                                                                                      
+                                                                                      
+<!-- l. 64 --><math class='equation' display='block' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><msub><mrow>
+                              <mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover></mrow><mrow><mi>λ</mi></mrow></msub> <mo class='MathClass-rel' stretchy='false'>=</mo> <mi mathvariant='italic'>𝜆𝑥</mi> <mo class='MathClass-bin' stretchy='false'>+</mo> <mo class='MathClass-open' stretchy='false'>(</mo><mn>1</mn> <mo class='MathClass-bin' stretchy='false'>−</mo> <mi>λ</mi><mo class='MathClass-close' stretchy='false'>)</mo><mi>μ</mi><mo class='MathClass-punc' stretchy='false'>,</mo><mspace class='qquad' width='2em'></mspace><mn>0</mn> <mo class='MathClass-rel' stretchy='false'>≤</mo> <mi>λ</mi> <mo class='MathClass-rel' stretchy='false'>≤</mo> <mn>1</mn><mo class='MathClass-punc' stretchy='false'>,</mo>
+</mrow></math></td></tr></table>
+<!-- l. 67 --><p class='indent'>   where <!-- l. 67 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mi>λ</mi></math> is a dial. At
+<!-- l. 67 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>λ</mi> <mo class='MathClass-rel' stretchy='false'>=</mo> <mn>1</mn></mrow></math> we take the reading as
+it is. At <!-- l. 67 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>λ</mi> <mo class='MathClass-rel' stretchy='false'>=</mo> <mn>0</mn></mrow></math> we ignore it
+and always answer <!-- l. 67 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mi>μ</mi></math>.
+At <!-- l. 67 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>λ</mi> <mo class='MathClass-rel' stretchy='false'>=</mo> <mn>0.5</mn></mrow></math> a
+reading of 180 becomes 175.
+</p><!-- l. 69 --><p class='indent'>   Take a person whose true height is <!-- l. 69 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>𝜃</mi> <mo class='MathClass-rel' stretchy='false'>=</mo> <mn>180</mn></mrow></math>
+and set <!-- l. 69 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>λ</mi> <mo class='MathClass-rel' stretchy='false'>=</mo> <mn>0.5</mn></mrow></math>. On average
+the estimate is <!-- l. 69 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mn>0.5</mn> <mo class='MathClass-bin' stretchy='false'>×</mo> <mn>180</mn> <mo class='MathClass-bin' stretchy='false'>+</mo> <mn>0.5</mn> <mo class='MathClass-bin' stretchy='false'>×</mo> <mn>170</mn> <mo class='MathClass-rel' stretchy='false'>=</mo> <mn>175</mn></mrow></math>,
+which is 5 cm too low. In general, </p><table class='equation-star'><tr><td>
+<!-- l. 70 --><math class='equation' display='block' xmlns='http://www.w3.org/1998/Math/MathML'><mrow>
+               <mstyle mathvariant='normal'><mi>Bias</mi></mstyle> <mo class='MathClass-rel' stretchy='false'>=</mo> <mo class='MathClass-open' stretchy='false'>(</mo><mn>1</mn> <mo class='MathClass-bin' stretchy='false'>−</mo> <mi>λ</mi><mo class='MathClass-close' stretchy='false'>)</mo><mo class='MathClass-open' stretchy='false'>(</mo><mi>μ</mi> <mo class='MathClass-bin' stretchy='false'>−</mo> <mi>𝜃</mi><mo class='MathClass-close' stretchy='false'>)</mo><mo class='MathClass-punc' stretchy='false'>,</mo><mspace class='qquad' width='2em'></mspace><mstyle mathvariant='normal'><mi>Var</mi></mstyle> <mo class='MathClass-rel' stretchy='false'>=</mo> <msup><mrow><mi>λ</mi></mrow><mrow><mn>2</mn></mrow></msup><msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup><mo class='MathClass-punc' stretchy='false'>,</mo><mspace class='qquad' width='2em'></mspace><msub><mrow><mstyle mathvariant='normal'><mi>MSE</mi></mstyle></mrow><mrow>
+<mi>𝜃</mi></mrow></msub> <mo class='MathClass-rel' stretchy='false'>=</mo> <msup><mrow><mi>λ</mi></mrow><mrow><mn>2</mn></mrow></msup><msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup> <mo class='MathClass-bin' stretchy='false'>+</mo> <msup><mrow><mo class='MathClass-open' stretchy='false'>(</mo><mn>1</mn> <mo class='MathClass-bin' stretchy='false'>−</mo> <mi>λ</mi><mo class='MathClass-close' stretchy='false'>)</mo></mrow><mrow><mn>2</mn></mrow></msup><msup><mrow><mo class='MathClass-open' stretchy='false'>(</mo><mi>μ</mi> <mo class='MathClass-bin' stretchy='false'>−</mo> <mi>𝜃</mi><mo class='MathClass-close' stretchy='false'>)</mo></mrow><mrow><mn>2</mn></mrow></msup><mo class='MathClass-punc' stretchy='false'>.</mo>
+</mrow></math></td></tr></table>
+<!-- l. 75 --><p class='indent'>   The bias is the fraction <!-- l. 75 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mn>1</mn> <mo class='MathClass-bin' stretchy='false'>−</mo> <mi>λ</mi></mrow></math> of the
+distance from the truth to <!-- l. 75 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mi>μ</mi></math>. The
+variance is <!-- l. 75 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><msup><mrow><mi>λ</mi></mrow><mrow><mn>2</mn></mrow></msup><msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup></mrow></math> because the noise only
+enters through <!-- l. 75 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mi>x</mi></math>, which now counts
+for a fraction <!-- l. 75 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mi>λ</mi></math> of the answer. With
+our numbers the variance falls from <!-- l. 75 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mn>100</mn></mrow></math>
+to <!-- l. 75 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mn>25</mn></mrow></math> and the
+bias is <!-- l. 75 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow> <mo class='MathClass-bin' stretchy='false'>−</mo> <mn>5</mn></mrow></math>, so
+<!-- l. 76 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><msub><mrow><mstyle mathvariant='normal'><mi>MSE</mi></mstyle></mrow><mrow><mi>𝜃</mi></mrow></msub> <mo class='MathClass-rel' stretchy='false'>=</mo> <mn>25</mn> <mo class='MathClass-bin' stretchy='false'>+</mo> <mn>25</mn> <mo class='MathClass-rel' stretchy='false'>=</mo> <mn>50</mn></mrow></math>, against
+<!-- l. 76 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mn>100</mn></mrow></math> for the unbiased
+reading (<!-- l. 76 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>λ</mi> <mo class='MathClass-rel' stretchy='false'>=</mo> <mn>1</mn></mrow></math>).
+</p><!-- l. 78 --><p class='indent'>   For a person who is exactly average (<!-- l. 78 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>𝜃</mi> <mo class='MathClass-rel' stretchy='false'>=</mo> <mn>170</mn></mrow></math>)
+the bias is zero and the error is only <!-- l. 78 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mn>25</mn></mrow></math>.
+For a very tall person (<!-- l. 78 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>𝜃</mi> <mo class='MathClass-rel' stretchy='false'>=</mo> <mn>200</mn></mrow></math>)
+the bias is <!-- l. 78 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow> <mo class='MathClass-bin' stretchy='false'>−</mo> <mn>15</mn></mrow></math> and
+the error is <!-- l. 78 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mn>25</mn> <mo class='MathClass-bin' stretchy='false'>+</mo> <mn>225</mn> <mo class='MathClass-rel' stretchy='false'>=</mo> <mn>250</mn></mrow></math>,
+worse than trusting the photo. With these numbers pulling towards
+<!-- l. 78 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mi>μ</mi></math> wins only when the true height
+is within about <!-- l. 78 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mn>17</mn></mrow></math> cm of the
+average. Since we do not know <!-- l. 78 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mi>𝜃</mi></math>
+in advance, the pull is a bet that the true value is near what we expect.
+</p><!-- l. 80 --><p class='indent'>   We can judge the bet by averaging over the values we expect to meet, for which
+<!-- l. 80 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>E</mi><mo class='MathClass-open' stretchy='false'>[</mo><msup><mrow><mo class='MathClass-open' stretchy='false'>(</mo><mi>μ</mi> <mo class='MathClass-bin' stretchy='false'>−</mo> <mi>𝜃</mi><mo class='MathClass-close' stretchy='false'>)</mo></mrow><mrow><mn>2</mn></mrow></msup><mo class='MathClass-close' stretchy='false'>]</mo> <mo class='MathClass-rel' stretchy='false'>=</mo> <msup><mrow><mi>τ</mi></mrow><mrow><mn>2</mn></mrow></msup></mrow></math>:
+</p><table class='equation-star'><tr><td>
+                                                                                      
+                                                                                      
+<!-- l. 81 --><math class='equation' display='block' xmlns='http://www.w3.org/1998/Math/MathML'><mrow>
+                               <mover accent='false' class='mml-overline'><mrow><mstyle mathvariant='normal'><mi>MSE</mi></mstyle></mrow><mo accent='true'>¯</mo></mover><mo class='MathClass-open' stretchy='false'>(</mo><mi>λ</mi><mo class='MathClass-close' stretchy='false'>)</mo> <mo class='MathClass-rel' stretchy='false'>=</mo> <msup><mrow><mi>λ</mi></mrow><mrow><mn>2</mn></mrow></msup><msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup> <mo class='MathClass-bin' stretchy='false'>+</mo> <msup><mrow><mo class='MathClass-open' stretchy='false'>(</mo><mn>1</mn> <mo class='MathClass-bin' stretchy='false'>−</mo> <mi>λ</mi><mo class='MathClass-close' stretchy='false'>)</mo></mrow><mrow><mn>2</mn></mrow></msup><msup><mrow><mi>τ</mi></mrow><mrow><mn>2</mn></mrow></msup><mo class='MathClass-punc' stretchy='false'>.</mo>
+</mrow></math></td></tr></table>
+<!-- l. 84 --><p class='indent'>   The first term falls as <!-- l. 84 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mi>λ</mi></math>
+shrinks and the second rises, so some intermediate dial setting is best. It is smallest
+when<span class='footnote-mark'><a href='#fn2x0' id='fn2x0-bk'><sup class='textsuperscript'>2</sup></a></span><a id='x1-4f2'></a>
+</p><table class='equation-star'><tr><td>
+<!-- l. 95 --><math class='equation' display='block' xmlns='http://www.w3.org/1998/Math/MathML'><mrow>
+                    <msup><mrow><mi>λ</mi></mrow><mrow><mo class='MathClass-bin' stretchy='false'>∗</mo></mrow></msup> <mo class='MathClass-rel' stretchy='false'>=</mo>     <mfrac><mrow><msup><mrow><mi>τ</mi></mrow><mrow><mn>2</mn></mrow></msup></mrow> 
+<mrow><msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup> <mo class='MathClass-bin' stretchy='false'>+</mo> <msup><mrow><mi>τ</mi></mrow><mrow><mn>2</mn></mrow></msup></mrow></mfrac> <mo class='MathClass-rel' stretchy='false'>=</mo>      <mfrac><mrow><mn>1</mn><mo class='MathClass-bin' stretchy='false'>∕</mo><msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup></mrow> 
+<mrow><mn>1</mn><mo class='MathClass-bin' stretchy='false'>∕</mo><msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup> <mo class='MathClass-bin' stretchy='false'>+</mo> <mn>1</mn><mo class='MathClass-bin' stretchy='false'>∕</mo><msup><mrow><mi>τ</mi></mrow><mrow><mn>2</mn></mrow></msup></mrow></mfrac><mo class='MathClass-punc' stretchy='false'>,</mo><mspace class='qquad' width='2em'></mspace><mover accent='false' class='mml-overline'><mrow><mstyle mathvariant='normal'><mi>MSE</mi></mstyle></mrow><mo accent='true'>¯</mo></mover><mo class='MathClass-open' stretchy='false'>(</mo><msup><mrow><mi>λ</mi></mrow><mrow><mo class='MathClass-bin' stretchy='false'>∗</mo></mrow></msup><mo class='MathClass-close' stretchy='false'>)</mo> <mo class='MathClass-rel' stretchy='false'>=</mo>   <mfrac><mrow><msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup><msup><mrow><mi>τ</mi></mrow><mrow><mn>2</mn></mrow></msup></mrow> 
+<mrow><msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup> <mo class='MathClass-bin' stretchy='false'>+</mo> <msup><mrow><mi>τ</mi></mrow><mrow><mn>2</mn></mrow></msup></mrow></mfrac> <mo class='MathClass-rel' stretchy='false'>&lt;</mo> <msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup><mo class='MathClass-punc' stretchy='false'>.</mo>
+</mrow></math></td></tr></table>
+<!-- l. 100 --><p class='noindent'>The best blend weights the reading and the expectation by their precisions,
+the inverse of their variances. If the photo is as noisy as people are varied
+(<!-- l. 100 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>σ</mi> <mo class='MathClass-rel' stretchy='false'>=</mo> <mi>τ</mi> <mo class='MathClass-rel' stretchy='false'>=</mo> <mn>10</mn></mrow></math>), the weights are
+equal, <!-- l. 100 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><msup><mrow><mi>λ</mi></mrow><mrow><mo class='MathClass-bin' stretchy='false'>∗</mo></mrow></msup> <mo class='MathClass-rel' stretchy='false'>=</mo> <mn>0.5</mn></mrow></math>, and the average
+error is <!-- l. 100 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mn>50</mn></mrow></math> instead of
+<!-- l. 100 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mn>100</mn></mrow></math>. If the photo is noisy but
+people are all much alike (<!-- l. 100 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>σ</mi> <mo class='MathClass-rel' stretchy='false'>=</mo> <mn>10</mn></mrow></math>,
+<!-- l. 100 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>τ</mi> <mo class='MathClass-rel' stretchy='false'>=</mo> <mn>5</mn></mrow></math>), we should lean
+mostly on the average: <!-- l. 100 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><msup><mrow><mi>λ</mi></mrow><mrow><mo class='MathClass-bin' stretchy='false'>∗</mo></mrow></msup> <mo class='MathClass-rel' stretchy='false'>=</mo> <mn>0.2</mn></mrow></math>
+and the error is <!-- l. 100 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mn>20</mn></mrow></math>.
+When the noise and the spread of true values are both Gaussian, this blend is exactly the posterior mean of
+Bayesian inference. The advantage holds on average over the values we expect to meet, not at every
+<!-- l. 100 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mi>𝜃</mi></math>: for the
+very tall person above, the unbiased reading does better.
+</p><!-- l. 102 --><p class='indent'>   Because <!-- l. 102 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mn>1</mn> <mo class='MathClass-bin' stretchy='false'>−</mo> <msup><mrow><mi>λ</mi></mrow><mrow><mo class='MathClass-bin' stretchy='false'>∗</mo></mrow></msup> <mo class='MathClass-rel' stretchy='false'>=</mo> <msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup><mo class='MathClass-bin' stretchy='false'>∕</mo><mo class='MathClass-open' stretchy='false'>(</mo><msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup> <mo class='MathClass-bin' stretchy='false'>+</mo> <msup><mrow><mi>τ</mi></mrow><mrow><mn>2</mn></mrow></msup><mo class='MathClass-close' stretchy='false'>)</mo></mrow></math>,
+the bias this estimator accepts is </p><table class='equation-star'><tr><td>
+<!-- l. 103 --><math class='equation' display='block' xmlns='http://www.w3.org/1998/Math/MathML'><mrow>
+                                 <mo class='MathClass-rel' stretchy='false'>|</mo><mstyle mathvariant='normal'><mi>Bias</mi></mstyle><mo class='MathClass-rel' stretchy='false'>|</mo> <mo class='MathClass-rel' stretchy='false'>=</mo>     <mfrac><mrow><msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup></mrow> 
+<mrow><msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup> <mo class='MathClass-bin' stretchy='false'>+</mo> <msup><mrow><mi>τ</mi></mrow><mrow><mn>2</mn></mrow></msup></mrow></mfrac><mspace class='thinspace' width='0.17em'></mspace><mo class='MathClass-rel' stretchy='false'>|</mo><mi>μ</mi> <mo class='MathClass-bin' stretchy='false'>−</mo> <mi>𝜃</mi><mo class='MathClass-rel' stretchy='false'>|</mo><mo class='MathClass-punc' stretchy='false'>.</mo>
+</mrow></math></td></tr></table>
+                                                                                      
+                                                                                      
+<!-- l. 106 --><p class='indent'>   With <!-- l. 106 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>τ</mi> <mo class='MathClass-rel' stretchy='false'>=</mo> <mn>10</mn></mrow></math>, a photo
+with <!-- l. 106 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>σ</mi> <mo class='MathClass-rel' stretchy='false'>=</mo> <mn>2</mn></mrow></math> is pulled
+by only about <!-- l. 106 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mn>4</mn><mi>%</mi></mrow></math> of
+the distance to <!-- l. 106 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mi>μ</mi></math>,
+one with <!-- l. 106 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>σ</mi> <mo class='MathClass-rel' stretchy='false'>=</mo> <mn>10</mn></mrow></math> by
+<!-- l. 106 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mn>50</mn><mi>%</mi></mrow></math>, and one
+with <!-- l. 106 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>σ</mi> <mo class='MathClass-rel' stretchy='false'>=</mo> <mn>30</mn></mrow></math> by
+<!-- l. 106 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mn>90</mn><mi>%</mi></mrow></math>. Bias
+and precision are separate properties of a device, but an estimator that uses its evidence sensibly couples them:
+the noisier the evidence, the more it leans on what it expects, and the more it is biased towards that
+expectation. This is regression to the mean.
+</p><!-- l. 108 --><p class='indent'>   That coupling exists only if the estimator knows how reliable the evidence is on this occasion. Suppose it keeps a fixed
+dial <!-- l. 108 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><msub><mrow><mi>λ</mi></mrow><mrow><mn>0</mn></mrow></msub> <mo class='MathClass-rel' stretchy='false'>=</mo> <mn>0.5</mn></mrow></math>, tuned for
+<!-- l. 108 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>σ</mi> <mo class='MathClass-rel' stretchy='false'>=</mo> <mn>10</mn></mrow></math>, while the photos change
+quality. Since <!-- l. 108 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mover accent='false' class='mml-overline'><mrow><mstyle mathvariant='normal'><mi>MSE</mi></mstyle></mrow><mo accent='true'>¯</mo></mover><mo class='MathClass-open' stretchy='false'>(</mo><mi>λ</mi><mo class='MathClass-close' stretchy='false'>)</mo></mrow></math> is a quadratic
+in <!-- l. 108 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mi>λ</mi></math> with its minimum at
+<!-- l. 108 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><msup><mrow><mi>λ</mi></mrow><mrow><mo class='MathClass-bin' stretchy='false'>∗</mo></mrow></msup></math>,<span class='footnote-mark'><a href='#fn3x0' id='fn3x0-bk'><sup class='textsuperscript'>3</sup></a></span><a id='x1-6f3'></a>
+</p><table class='equation-star'><tr><td>
+<!-- l. 111 --><math class='equation' display='block' xmlns='http://www.w3.org/1998/Math/MathML'><mrow>
+                         <mover accent='false' class='mml-overline'><mrow><mstyle mathvariant='normal'><mi>MSE</mi></mstyle></mrow><mo accent='true'>¯</mo></mover><mo class='MathClass-open' stretchy='false'>(</mo><msub><mrow><mi>λ</mi></mrow><mrow><mn>0</mn></mrow></msub><mo class='MathClass-close' stretchy='false'>)</mo> <mo class='MathClass-rel' stretchy='false'>=</mo> <mover accent='false' class='mml-overline'><mrow><mstyle mathvariant='normal'><mi>MSE</mi></mstyle></mrow><mo accent='true'>¯</mo></mover><mo class='MathClass-open' stretchy='false'>(</mo><msup><mrow><mi>λ</mi></mrow><mrow><mo class='MathClass-bin' stretchy='false'>∗</mo></mrow></msup><mo class='MathClass-close' stretchy='false'>)</mo> <mo class='MathClass-bin' stretchy='false'>+</mo> <mo class='MathClass-open' stretchy='false'>(</mo><msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup> <mo class='MathClass-bin' stretchy='false'>+</mo> <msup><mrow><mi>τ</mi></mrow><mrow><mn>2</mn></mrow></msup><mo class='MathClass-close' stretchy='false'>)</mo><mspace class='thinspace' width='0.17em'></mspace><msup><mrow><mo class='MathClass-open' stretchy='false'>(</mo><msub><mrow><mi>λ</mi></mrow><mrow>
+<mn>0</mn></mrow></msub> <mo class='MathClass-bin' stretchy='false'>−</mo> <msup><mrow><mi>λ</mi></mrow><mrow><mo class='MathClass-bin' stretchy='false'>∗</mo></mrow></msup><mo class='MathClass-close' stretchy='false'>)</mo></mrow><mrow><mn>2</mn></mrow></msup><mo class='MathClass-punc' stretchy='false'>,</mo>
+</mrow></math></td></tr></table>
+<!-- l. 115 --><p class='indent'>   so the excess error grows with the square of the miscalibration. The table shows both ways to get it wrong,
+with <!-- l. 115 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>τ</mi> <mo class='MathClass-rel' stretchy='false'>=</mo> <mn>10</mn></mrow></math>.
+</p>
+<div class='center'>
+<!-- l. 117 --><p class='noindent'>
+</p>
+<div class='tabular'> <table class='tabular' id='TBL-1'><colgroup id='TBL-1-1g'><col id='TBL-1-1' /><col id='TBL-1-2' /><col id='TBL-1-3' /><col id='TBL-1-4' /><col id='TBL-1-5' /></colgroup><tr class='array-hline'><td></td><td></td><td></td><td></td><td></td></tr><tr id='TBL-1-1-' style='vertical-align:baseline;'><td class='td11' id='TBL-1-1-1' style='text-align:left; white-space:nowrap;'> True noise <!-- l. 120 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mi>σ</mi></math>  </td><td class='td11' id='TBL-1-1-2' style='text-align:left; white-space:nowrap;'> Dial                                                                                                                                                 </td><td class='td11' id='TBL-1-1-3' style='text-align:right; white-space:nowrap;'> Variance  </td><td class='td11' id='TBL-1-1-4' style='text-align:right; white-space:nowrap;'> Bias<!-- l. 120 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><msup><mrow></mrow><mrow><mn>2</mn></mrow></msup></math>  </td><td class='td11' id='TBL-1-1-5' style='text-align:right; white-space:nowrap;'> Total  </td>
+</tr><tr class='array-hline'><td></td><td></td><td></td><td></td><td></td></tr><tr id='TBL-1-2-' style='vertical-align:baseline;'><td class='td11' id='TBL-1-2-1' style='text-align:left; white-space:nowrap;'> 30 (noisier than assumed)                                                                                                                       </td><td class='td11' id='TBL-1-2-2' style='text-align:left; white-space:nowrap;'> fixed, <!-- l. 122 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><msub><mrow><mi>λ</mi></mrow><mrow><mn>0</mn></mrow></msub> <mo class='MathClass-rel' stretchy='false'>=</mo> <mn>0.5</mn></mrow></math>      </td><td class='td11' id='TBL-1-2-3' style='text-align:right; white-space:nowrap;'>     225  </td><td class='td11' id='TBL-1-2-4' style='text-align:right; white-space:nowrap;'>                                                                                         25  </td><td class='td11' id='TBL-1-2-5' style='text-align:right; white-space:nowrap;'>   250  </td>
+</tr><tr id='TBL-1-3-' style='vertical-align:baseline;'><td class='td11' id='TBL-1-3-1' style='text-align:left; white-space:nowrap;'> 30                                                                                                                                                      </td><td class='td11' id='TBL-1-3-2' style='text-align:left; white-space:nowrap;'> adapted, <!-- l. 123 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><msup><mrow><mi>λ</mi></mrow><mrow><mo class='MathClass-bin' stretchy='false'>∗</mo></mrow></msup> <mo class='MathClass-rel' stretchy='false'>=</mo> <mn>0.1</mn></mrow></math>  </td><td class='td11' id='TBL-1-3-3' style='text-align:right; white-space:nowrap;'>       9  </td><td class='td11' id='TBL-1-3-4' style='text-align:right; white-space:nowrap;'>                                                                                         81  </td><td class='td11' id='TBL-1-3-5' style='text-align:right; white-space:nowrap;'>    90  </td>
+</tr><tr class='array-hline'><td></td><td></td><td></td><td></td><td></td></tr><tr id='TBL-1-4-' style='vertical-align:baseline;'><td class='td11' id='TBL-1-4-1' style='text-align:left; white-space:nowrap;'> 2 (cleaner than assumed)                                                                                                                        </td><td class='td11' id='TBL-1-4-2' style='text-align:left; white-space:nowrap;'> fixed, <!-- l. 125 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><msub><mrow><mi>λ</mi></mrow><mrow><mn>0</mn></mrow></msub> <mo class='MathClass-rel' stretchy='false'>=</mo> <mn>0.5</mn></mrow></math>      </td><td class='td11' id='TBL-1-4-3' style='text-align:right; white-space:nowrap;'>       1  </td><td class='td11' id='TBL-1-4-4' style='text-align:right; white-space:nowrap;'>                                                                                         25  </td><td class='td11' id='TBL-1-4-5' style='text-align:right; white-space:nowrap;'>    26  </td>
+</tr><tr id='TBL-1-5-' style='vertical-align:baseline;'><td class='td11' id='TBL-1-5-1' style='text-align:left; white-space:nowrap;'> 2                                                                                                                                                        </td><td class='td11' id='TBL-1-5-2' style='text-align:left; white-space:nowrap;'> adapted, <!-- l. 126 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><msup><mrow><mi>λ</mi></mrow><mrow><mo class='MathClass-bin' stretchy='false'>∗</mo></mrow></msup><mo class='MathClass-rel' stretchy='false'>≈</mo> <mn>0.96</mn></mrow></math>  </td><td class='td11' id='TBL-1-5-3' style='text-align:right; white-space:nowrap;'>      3.7  </td><td class='td11' id='TBL-1-5-4' style='text-align:right; white-space:nowrap;'>                                                                                         0.1  </td><td class='td11' id='TBL-1-5-5' style='text-align:right; white-space:nowrap;'>   3.8  </td>
+</tr><tr class='array-hline'><td></td><td></td><td></td><td></td><td></td></tr></table>                                                                                                                                                                                                                     </div></div>
+<!-- l. 131 --><p class='indent'>   If the measurement is noisier than assumed, the fixed estimator trusts it too much and pays in variance. If it
+is cleaner than assumed, the estimator shrinks too much and pays in bias. In this simple model, a
+change in measurement quality that goes unnoticed changes the variance but leaves the bias fixed at
+<!-- l. 131 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mo class='MathClass-open' stretchy='false'>(</mo><mn>1</mn> <mo class='MathClass-bin' stretchy='false'>−</mo> <msub><mrow><mi>λ</mi></mrow><mrow><mn>0</mn></mrow></msub><mo class='MathClass-close' stretchy='false'>)</mo><mo class='MathClass-open' stretchy='false'>(</mo><mi>μ</mi> <mo class='MathClass-bin' stretchy='false'>−</mo> <mi>𝜃</mi><mo class='MathClass-close' stretchy='false'>)</mo></mrow></math>, while
+an estimator that is told about the change adjusts its bias on purpose.
+</p><!-- l. 133 --><p class='indent'>   Not every change in a measurement is noise. Suppose something shifts the measurement itself, so that
+<!-- l. 133 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>x</mi> <mo class='MathClass-rel' stretchy='false'>=</mo> <mi>𝜃</mi> <mo class='MathClass-bin' stretchy='false'>+</mo> <mi>δ</mi> <mo class='MathClass-bin' stretchy='false'>+</mo> <mi>𝜀</mi></mrow></math> with
+<!-- l. 133 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mi>δ</mi></math>
+a systematic distortion, for example a lens that makes everyone look
+<!-- l. 133 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mn>5</mn></math> cm taller. An estimator
+that does not know about <!-- l. 133 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mi>δ</mi></math>
+treats it as signal, and the distortion passes straight into its bias: </p><table class='equation-star'><tr><td>
+                                                                                      
+                                                                                      
+<!-- l. 134 --><math class='equation' display='block' xmlns='http://www.w3.org/1998/Math/MathML'><mrow>
+                             <mi>E</mi><mo class='MathClass-open' stretchy='false'>[</mo><msub><mrow><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover></mrow><mrow><mi>λ</mi></mrow></msub><mo class='MathClass-close' stretchy='false'>]</mo> <mo class='MathClass-bin' stretchy='false'>−</mo> <mi>𝜃</mi> <mo class='MathClass-rel' stretchy='false'>=</mo> <mi mathvariant='italic'>𝜆𝛿</mi> <mo class='MathClass-bin' stretchy='false'>+</mo> <mo class='MathClass-open' stretchy='false'>(</mo><mn>1</mn> <mo class='MathClass-bin' stretchy='false'>−</mo> <mi>λ</mi><mo class='MathClass-close' stretchy='false'>)</mo><mo class='MathClass-open' stretchy='false'>(</mo><mi>μ</mi> <mo class='MathClass-bin' stretchy='false'>−</mo> <mi>𝜃</mi><mo class='MathClass-close' stretchy='false'>)</mo><mo class='MathClass-punc' stretchy='false'>.</mo>
+</mrow></math></td></tr></table>
+<!-- l. 137 --><p class='indent'>   An estimator that knows <!-- l. 137 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mi>δ</mi></math>, or
+can infer it, subtracts it, using <!-- l. 137 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><msub><mrow><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover></mrow><mrow><mi>λ</mi></mrow></msub> <mo class='MathClass-rel' stretchy='false'>=</mo> <mi>λ</mi><mo class='MathClass-open' stretchy='false'>(</mo><mi>x</mi> <mo class='MathClass-bin' stretchy='false'>−</mo> <mi>δ</mi><mo class='MathClass-close' stretchy='false'>)</mo> <mo class='MathClass-bin' stretchy='false'>+</mo> <mo class='MathClass-open' stretchy='false'>(</mo><mn>1</mn> <mo class='MathClass-bin' stretchy='false'>−</mo> <mi>λ</mi><mo class='MathClass-close' stretchy='false'>)</mo><mi>μ</mi></mrow></math>,
+and the extra term <!-- l. 137 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi mathvariant='italic'>𝜆𝛿</mi></mrow></math>
+disappears. Knowing why the measurement changed removes the bias that the change would otherwise cause. A
+change that only widens the noise is different: it cannot move the average of the measurements, only their
+spread.
+</p><!-- l. 139 --><p class='indent'>   Finally, whether an estimator is biased depends on the scale on which we judge it. Let
+<!-- l. 139 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>V</mi> </mrow></math> be the usual sample variance
+(with <!-- l. 139 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>n</mi> <mo class='MathClass-bin' stretchy='false'>−</mo> <mn>1</mn></mrow></math> in the denominator),
+which is unbiased for <!-- l. 139 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup></math>,
+so <!-- l. 139 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>E</mi><mo class='MathClass-open' stretchy='false'>[</mo><mi>V</mi> <mo class='MathClass-close' stretchy='false'>]</mo> <mo class='MathClass-rel' stretchy='false'>=</mo> <msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup></mrow></math>. Its square root
+<!-- l. 139 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>s</mi> <mo class='MathClass-rel' stretchy='false'>=</mo> <msqrt><mrow><mi>V</mi></mrow></msqrt></mrow></math>, the sample standard
+deviation, is not unbiased for <!-- l. 139 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mi>σ</mi></math>.
+Because the square root is concave, Jensen’s inequality gives </p><table class='equation-star'><tr><td>
+<!-- l. 140 --><math class='equation' display='block' xmlns='http://www.w3.org/1998/Math/MathML'><mrow>
+                               <mi>E</mi><mo class='MathClass-open' stretchy='false'>[</mo><mi>s</mi><mo class='MathClass-close' stretchy='false'>]</mo> <mo class='MathClass-rel' stretchy='false'>=</mo> <mi>E</mi><mspace class='negthinspace' width='-0.17em'></mspace> <mrow><mo fence='true' form='prefix'>[</mo><mrow><msqrt><mrow><mi>V</mi></mrow></msqrt></mrow><mo fence='true' form='postfix'>]</mo></mrow> <mo class='MathClass-rel' stretchy='false'>≤</mo><msqrt><mrow><mi>E</mi><mo class='MathClass-open' stretchy='false'>[</mo><mi>V</mi> <mo class='MathClass-close' stretchy='false'>]</mo></mrow></msqrt> <mo class='MathClass-rel' stretchy='false'>=</mo> <mi>σ</mi><mo class='MathClass-punc' stretchy='false'>,</mo>
+</mrow></math></td></tr></table>
+<!-- l. 143 --><p class='indent'>   with strict inequality unless <!-- l. 143 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>V</mi> </mrow></math>
+is constant. More generally, <!-- l. 143 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mi>E</mi><mo class='MathClass-open' stretchy='false'>[</mo><mi>f</mi><mo class='MathClass-open' stretchy='false'>(</mo><mi>X</mi><mo class='MathClass-close' stretchy='false'>)</mo><mo class='MathClass-close' stretchy='false'>]</mo><mo class='MathClass-rel' stretchy='false'>≠</mo><mi>f</mi><mo class='MathClass-open' stretchy='false'>(</mo><mi>E</mi><mo class='MathClass-open' stretchy='false'>[</mo><mi>X</mi><mo class='MathClass-close' stretchy='false'>]</mo><mo class='MathClass-close' stretchy='false'>)</mo></mrow></math>
+whenever <!-- l. 143 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mi>f</mi></math> is
+curved. An estimator that is unbiased on one scale is therefore generally biased on another, so bias is a property
+of an estimator together with the scale it is judged on.
+</p><!-- l. 145 --><p class='indent'>   Bias and precision are two separate axes of error, and the standard summaries of spread see only one of
+them. A standard error shrinks with more data whether or not the estimate is right. Bias can be a deliberate
+trade for lower total error, in which case it tracks the estimator’s own knowledge of how reliable its evidence is.
+And a change in the quality of evidence need not produce a bias, provided the estimator can account for why it
+changed.
+</p>
+                                                                                      
+                                                                                      
+   <div class='footnotes'><a id='x1-3x'></a>
+<!-- l. 48 --><p class='indent'>    <span class='footnote-mark'><a href='#fn1x0-bk' id='fn1x0'><sup class='textsuperscript'>1</sup></a></span>
+</p><!-- tex4ht:inline --><!-- l. 48 --><math display='block' xmlns='http://www.w3.org/1998/Math/MathML'><mtable class='align-star' columnalign='left' displaystyle='true' rowlines='none none none' style=''>
+      <mtr><mtd class='align-odd' columnalign='right'><mstyle mathvariant='normal'><mi>MSE</mi></mstyle><mo class='MathClass-open' stretchy='false'>(</mo><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover><mo class='MathClass-close' stretchy='false'>)</mo></mtd>       <mtd class='align-even'> <mo class='MathClass-rel' stretchy='false'>=</mo> <mi>𝔼</mi><mspace class='negthinspace' width='-0.17em'></mspace> <mrow><mo fence='true' form='prefix'>[</mo><mrow><msup><mrow><mo class='MathClass-open' stretchy='false'>(</mo><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover> <mo class='MathClass-bin' stretchy='false'>−</mo> <mi>𝜃</mi><mo class='MathClass-close' stretchy='false'>)</mo></mrow><mrow><mn>2</mn></mrow></msup></mrow><mo fence='true' form='postfix'>]</mo></mrow><mspace width='2em'></mspace></mtd>                                                                    <mtd class='align-odd' columnalign='right'></mtd>       <mtd class='align-even'><mstyle class='text'><mtext>(definition)</mtext></mstyle><mspace width='2em'></mspace></mtd>                                                  <mtd class='align-label' columnalign='right'></mtd>       <mtd class='align-label'><mspace width='2em'></mspace></mtd>       <mtd class='align-label' columnalign='right'></mtd>       <mtd class='align-label'>
+       <mspace width='2em'></mspace></mtd></mtr><mtr><mtd class='align-odd' columnalign='right'></mtd>                  <mtd class='align-even'> <mo class='MathClass-rel' stretchy='false'>=</mo> <mi>𝔼</mi><mspace class='negthinspace' width='-0.17em'></mspace> <mrow><mo fence='true' form='prefix'>[</mo><mrow><mstyle mathsize='1.61em'><mrow><mo fence='true' form='prefix'>(</mo><mrow></mrow><mo fence='true' form='postfix'></mo></mrow></mstyle><mstyle mathsize='1.19em'><mrow><mo fence='true' form='prefix'>(</mo><mrow></mrow><mo fence='true' form='postfix'></mo></mrow></mstyle><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover> <mo class='MathClass-bin' stretchy='false'>−</mo><mi>𝔼</mi><mo class='MathClass-open' stretchy='false'>[</mo><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover><mo class='MathClass-close' stretchy='false'>]</mo><mstyle mathsize='1.19em'><mrow><mo fence='true' form='prefix'>)</mo><mrow></mrow><mo fence='true' form='postfix'></mo></mrow></mstyle> <mo class='MathClass-bin' stretchy='false'>+</mo> <mstyle mathsize='1.19em'><mrow><mo fence='true' form='prefix'>(</mo><mrow></mrow><mo fence='true' form='postfix'></mo></mrow></mstyle><mi>𝔼</mi><mo class='MathClass-open' stretchy='false'>[</mo><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover><mo class='MathClass-close' stretchy='false'>]</mo> <mo class='MathClass-bin' stretchy='false'>−</mo> <mi>𝜃</mi><mstyle mathsize='1.19em'><mrow><mo fence='true' form='prefix'>)</mo><mrow></mrow><mo fence='true' form='postfix'></mo></mrow></mstyle><msup><mrow><mstyle mathsize='1.61em'><mrow><mo fence='true' form='prefix'>)</mo><mrow></mrow><mo fence='true' form='postfix'></mo></mrow></mstyle></mrow><mrow><mn>2</mn></mrow></msup></mrow><mo fence='true' form='postfix'>]</mo></mrow><mspace width='2em'></mspace></mtd>                                               <mtd class='align-odd' columnalign='right'></mtd>       <mtd class='align-even'><mstyle class='text'><mtext>(add and subtract </mtext></mstyle><mi>𝔼</mi><mo class='MathClass-open' stretchy='false'>[</mo><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover><mo class='MathClass-close' stretchy='false'>]</mo><mstyle class='text'><mtext>)</mtext></mstyle><mspace width='2em'></mspace></mtd>                                <mtd class='align-label' columnalign='right'></mtd>       <mtd class='align-label'><mspace width='2em'></mspace></mtd>       <mtd class='align-label' columnalign='right'></mtd>       <mtd class='align-label'>
+       <mspace width='2em'></mspace></mtd></mtr><mtr><mtd class='align-odd' columnalign='right'></mtd>                  <mtd class='align-even'> <mo class='MathClass-rel' stretchy='false'>=</mo> <mi>𝔼</mi><mspace class='negthinspace' width='-0.17em'></mspace> <mrow><mo fence='true' form='prefix'>[</mo><mrow><mstyle mathsize='1.19em'><mrow><mo fence='true' form='prefix'>(</mo><mrow></mrow><mo fence='true' form='postfix'></mo></mrow></mstyle><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover> <mo class='MathClass-bin' stretchy='false'>−</mo><mi>𝔼</mi><mo class='MathClass-open' stretchy='false'>[</mo><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover><mo class='MathClass-close' stretchy='false'>]</mo><msup><mrow><mstyle mathsize='1.19em'><mrow><mo fence='true' form='prefix'>)</mo><mrow></mrow><mo fence='true' form='postfix'></mo></mrow></mstyle></mrow><mrow><mn>2</mn></mrow></msup></mrow><mo fence='true' form='postfix'>]</mo></mrow> <mo class='MathClass-bin' stretchy='false'>+</mo> <mn>2</mn><mspace class='thinspace' width='0.17em'></mspace><mstyle mathsize='1.19em'><mrow><mo fence='true' form='prefix'>(</mo><mrow></mrow><mo fence='true' form='postfix'></mo></mrow></mstyle><mi>𝔼</mi><mo class='MathClass-open' stretchy='false'>[</mo><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover><mo class='MathClass-close' stretchy='false'>]</mo> <mo class='MathClass-bin' stretchy='false'>−</mo> <mi>𝜃</mi><mstyle mathsize='1.19em'><mrow><mo fence='true' form='prefix'>)</mo><mrow></mrow><mo fence='true' form='postfix'></mo></mrow></mstyle><mspace class='thinspace' width='0.17em'></mspace><mi>𝔼</mi><mspace class='negthinspace' width='-0.17em'></mspace> <mrow><mo fence='true' form='prefix'>[</mo><mrow><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover> <mo class='MathClass-bin' stretchy='false'>−</mo><mi>𝔼</mi><mo class='MathClass-open' stretchy='false'>[</mo><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover><mo class='MathClass-close' stretchy='false'>]</mo></mrow><mo fence='true' form='postfix'>]</mo></mrow> <mo class='MathClass-bin' stretchy='false'>+</mo> <mstyle mathsize='1.19em'><mrow><mo fence='true' form='prefix'>(</mo><mrow></mrow><mo fence='true' form='postfix'></mo></mrow></mstyle><mi>𝔼</mi><mo class='MathClass-open' stretchy='false'>[</mo><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover><mo class='MathClass-close' stretchy='false'>]</mo> <mo class='MathClass-bin' stretchy='false'>−</mo> <mi>𝜃</mi><msup><mrow><mstyle mathsize='1.19em'><mrow><mo fence='true' form='prefix'>)</mo><mrow></mrow><mo fence='true' form='postfix'></mo></mrow></mstyle></mrow><mrow><mn>2</mn></mrow></msup><mspace width='2em'></mspace></mtd>       <mtd class='align-odd' columnalign='right'></mtd>       <mtd class='align-even'><mstyle class='text'><mtext>(expand; the constant </mtext></mstyle><mi>𝔼</mi><mo class='MathClass-open' stretchy='false'>[</mo><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover><mo class='MathClass-close' stretchy='false'>]</mo> <mo class='MathClass-bin' stretchy='false'>−</mo> <mi>𝜃</mi><mstyle class='text'><mtext> factors out)</mtext></mstyle><mspace width='2em'></mspace></mtd>       <mtd class='align-label' columnalign='right'></mtd>       <mtd class='align-label'><mspace width='2em'></mspace></mtd>       <mtd class='align-label' columnalign='right'></mtd>       <mtd class='align-label'>
+       <mspace width='2em'></mspace></mtd></mtr><mtr><mtd class='align-odd' columnalign='right'></mtd>                  <mtd class='align-even'> <mo class='MathClass-rel' stretchy='false'>=</mo> <mstyle mathvariant='normal'><mi>Var</mi></mstyle><mo class='MathClass-open' stretchy='false'>(</mo><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover><mo class='MathClass-close' stretchy='false'>)</mo> <mo class='MathClass-bin' stretchy='false'>+</mo> <mn>0</mn> <mo class='MathClass-bin' stretchy='false'>+</mo> <mstyle mathvariant='normal'><mi>Bias</mi></mstyle><msup><mrow><mo class='MathClass-open' stretchy='false'>(</mo><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover><mo class='MathClass-close' stretchy='false'>)</mo></mrow><mrow><mn>2</mn></mrow></msup><mspace width='2em'></mspace></mtd>                                                  <mtd class='align-odd' columnalign='right'></mtd>       <mtd class='align-even'><mstyle class='text'><mtext>(since </mtext></mstyle><mi>𝔼</mi><mspace class='negthinspace' width='-0.17em'></mspace> <mrow><mo fence='true' form='prefix'>[</mo><mrow><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover> <mo class='MathClass-bin' stretchy='false'>−</mo><mi>𝔼</mi><mo class='MathClass-open' stretchy='false'>[</mo><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover><mo class='MathClass-close' stretchy='false'>]</mo></mrow><mo fence='true' form='postfix'>]</mo></mrow> <mo class='MathClass-rel' stretchy='false'>=</mo> <mn>0</mn><mstyle class='text'><mtext>)</mtext></mstyle><mspace width='2em'></mspace></mtd>                                <mtd class='align-label' columnalign='right'></mtd>       <mtd class='align-label'><mspace width='2em'></mspace></mtd>       <mtd class='align-label' columnalign='right'></mtd>       <mtd class='align-label'>
+       <mspace width='2em'></mspace></mtd></mtr><mtr><mtd class='align-odd' columnalign='right'></mtd>                  <mtd class='align-even'> <mo class='MathClass-rel' stretchy='false'>=</mo> <mstyle mathvariant='normal'><mi>Var</mi></mstyle><mo class='MathClass-open' stretchy='false'>(</mo><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover><mo class='MathClass-close' stretchy='false'>)</mo> <mo class='MathClass-bin' stretchy='false'>+</mo> <mstyle mathvariant='normal'><mi>Bias</mi></mstyle><msup><mrow><mo class='MathClass-open' stretchy='false'>(</mo><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover><mo class='MathClass-close' stretchy='false'>)</mo></mrow><mrow><mn>2</mn></mrow></msup><mo class='MathClass-punc' stretchy='false'>,</mo><mspace class='qquad' width='2em'></mspace><mstyle mathvariant='normal'><mi>Bias</mi></mstyle><mo class='MathClass-open' stretchy='false'>(</mo><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover><mo class='MathClass-close' stretchy='false'>)</mo> <mo class='MathClass-rel' stretchy='false'>=</mo> <mi>𝔼</mi><mo class='MathClass-open' stretchy='false'>[</mo><mover accent='true'><mrow><mi>𝜃</mi></mrow><mo accent='true'>^</mo></mover><mo class='MathClass-close' stretchy='false'>]</mo> <mo class='MathClass-bin' stretchy='false'>−</mo> <mi>𝜃</mi><mo class='MathClass-punc' stretchy='false'>.</mo><mspace width='2em'></mspace></mtd>                 <mtd class='align-odd' columnalign='right'></mtd>      <mtd class='align-even'><mspace width='2em'></mspace></mtd>                                                       <mtd class='align-label' columnalign='right'></mtd>      <mtd class='align-label'>
+   <mspace width='2em'></mspace></mtd></mtr></mtable></math>
+<a id='x1-5x'></a>
+<!-- l. 94 --><p class='indent'>    <span class='footnote-mark'><a href='#fn2x0-bk' id='fn2x0'><sup class='textsuperscript'>2</sup></a></span>
+</p><!-- tex4ht:inline --><!-- l. 94 --><math display='block' xmlns='http://www.w3.org/1998/Math/MathML'><mtable class='align-star' columnalign='left' displaystyle='true' rowlines='' style=''>
+                           <mtr><mtd class='align-odd' columnalign='right'> <mfrac><mrow><mi>d</mi></mrow>
+<mrow><mi mathvariant='italic'>𝑑𝜆</mi></mrow></mfrac><mover accent='false' class='mml-overline'><mrow><mstyle mathvariant='normal'><mi>MSE</mi></mstyle></mrow><mo accent='true'>¯</mo></mover></mtd>                               <mtd class='align-even'> <mo class='MathClass-rel' stretchy='false'>=</mo> <mn>2</mn><mi>λ</mi><msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup> <mo class='MathClass-bin' stretchy='false'>−</mo> <mn>2</mn><mo class='MathClass-open' stretchy='false'>(</mo><mn>1</mn> <mo class='MathClass-bin' stretchy='false'>−</mo> <mi>λ</mi><mo class='MathClass-close' stretchy='false'>)</mo><msup><mrow><mi>τ</mi></mrow><mrow><mn>2</mn></mrow></msup> <mo class='MathClass-rel' stretchy='false'>=</mo> <mn>0</mn><mspace class='thickpace' width='0.28em'></mspace> <mo class='MathClass-rel' stretchy='false'>⇒</mo><mspace class='thickpace' width='0.28em'></mspace><msup><mrow><mi>λ</mi></mrow><mrow><mo class='MathClass-bin' stretchy='false'>∗</mo></mrow></msup> <mo class='MathClass-rel' stretchy='false'>=</mo>     <mfrac><mrow><msup><mrow><mi>τ</mi></mrow><mrow><mn>2</mn></mrow></msup></mrow> 
+<mrow><msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup> <mo class='MathClass-bin' stretchy='false'>+</mo> <msup><mrow><mi>τ</mi></mrow><mrow><mn>2</mn></mrow></msup></mrow></mfrac><mo class='MathClass-punc' stretchy='false'>,</mo><mspace class='qquad' width='2em'></mspace><mn>1</mn> <mo class='MathClass-bin' stretchy='false'>−</mo> <msup><mrow><mi>λ</mi></mrow><mrow><mo class='MathClass-bin' stretchy='false'>∗</mo></mrow></msup> <mo class='MathClass-rel' stretchy='false'>=</mo>     <mfrac><mrow><msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup></mrow> 
+<mrow><msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup> <mo class='MathClass-bin' stretchy='false'>+</mo> <msup><mrow><mi>τ</mi></mrow><mrow><mn>2</mn></mrow></msup></mrow></mfrac><mo class='MathClass-punc' stretchy='false'>,</mo><mspace width='2em'></mspace></mtd>                         <mtd class='align-label' columnalign='right'></mtd>                         <mtd class='align-label'>
+                         <mspace width='2em'></mspace></mtd></mtr><mtr><mtd class='align-odd' columnalign='right'><mover accent='false' class='mml-overline'><mrow><mstyle mathvariant='normal'><mi>MSE</mi></mstyle></mrow><mo accent='true'>¯</mo></mover><mo class='MathClass-open' stretchy='false'>(</mo><msup><mrow><mi>λ</mi></mrow><mrow><mo class='MathClass-bin' stretchy='false'>∗</mo></mrow></msup><mo class='MathClass-close' stretchy='false'>)</mo></mtd>                              <mtd class='align-even'> <mo class='MathClass-rel' stretchy='false'>=</mo> <mfrac><mrow><msup><mrow><mi>τ</mi></mrow><mrow><mn>4</mn></mrow></msup><msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup> <mo class='MathClass-bin' stretchy='false'>+</mo> <msup><mrow><mi>σ</mi></mrow><mrow><mn>4</mn></mrow></msup><msup><mrow><mi>τ</mi></mrow><mrow><mn>2</mn></mrow></msup></mrow> 
+ <mrow><msup><mrow><mo class='MathClass-open' stretchy='false'>(</mo><msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup> <mo class='MathClass-bin' stretchy='false'>+</mo> <msup><mrow><mi>τ</mi></mrow><mrow><mn>2</mn></mrow></msup><mo class='MathClass-close' stretchy='false'>)</mo></mrow><mrow><mn>2</mn></mrow></msup></mrow></mfrac>   <mo class='MathClass-rel' stretchy='false'>=</mo>   <mfrac><mrow><msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup><msup><mrow><mi>τ</mi></mrow><mrow><mn>2</mn></mrow></msup></mrow> 
+<mrow><msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup> <mo class='MathClass-bin' stretchy='false'>+</mo> <msup><mrow><mi>τ</mi></mrow><mrow><mn>2</mn></mrow></msup></mrow></mfrac><mo class='MathClass-punc' stretchy='false'>.</mo><mspace width='2em'></mspace></mtd>                                                                <mtd class='align-label' columnalign='right'></mtd>                         <mtd class='align-label'>
+   <mspace width='2em'></mspace></mtd></mtr></mtable></math>
+<a id='x1-7x'></a>
+<!-- l. 110 --><p class='indent'>    <span class='footnote-mark'><a href='#fn3x0-bk' id='fn3x0'><sup class='textsuperscript'>3</sup></a></span><span class='cmr-8'>Expanding, </span><!-- l. 110 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mover accent='false' class='mml-overline'><mrow><mstyle mathvariant='normal'><mi>MSE</mi></mstyle></mrow><mo accent='true'>¯</mo></mover><mo class='MathClass-open' stretchy='false'>(</mo><mi>λ</mi><mo class='MathClass-close' stretchy='false'>)</mo> <mo class='MathClass-rel' stretchy='false'>=</mo> <mo class='MathClass-open' stretchy='false'>(</mo><msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup> <mo class='MathClass-bin' stretchy='false'>+</mo> <msup><mrow><mi>τ</mi></mrow><mrow><mn>2</mn></mrow></msup><mo class='MathClass-close' stretchy='false'>)</mo><msup><mrow><mi>λ</mi></mrow><mrow><mn>2</mn></mrow></msup> <mo class='MathClass-bin' stretchy='false'>−</mo> <mn>2</mn><msup><mrow><mi>τ</mi></mrow><mrow><mn>2</mn></mrow></msup><mi>λ</mi> <mo class='MathClass-bin' stretchy='false'>+</mo> <msup><mrow><mi>τ</mi></mrow><mrow><mn>2</mn></mrow></msup></mrow></math><span class='cmr-8'>, and
+completing the square gives </span><!-- l. 110 --><math display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mrow><mo class='MathClass-open' stretchy='false'>(</mo><msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup> <mo class='MathClass-bin' stretchy='false'>+</mo> <msup><mrow><mi>τ</mi></mrow><mrow><mn>2</mn></mrow></msup><mo class='MathClass-close' stretchy='false'>)</mo><msup><mrow><mo class='MathClass-open' stretchy='false'>(</mo><mi>λ</mi> <mo class='MathClass-bin' stretchy='false'>−</mo> <msup><mrow><mi>λ</mi></mrow><mrow><mo class='MathClass-bin' stretchy='false'>∗</mo></mrow></msup><mo class='MathClass-close' stretchy='false'>)</mo></mrow><mrow><mn>2</mn></mrow></msup> <mo class='MathClass-bin' stretchy='false'>+</mo> <msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup><msup><mrow><mi>τ</mi></mrow><mrow><mn>2</mn></mrow></msup><mo class='MathClass-bin' stretchy='false'>∕</mo><mo class='MathClass-open' stretchy='false'>(</mo><msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup> <mo class='MathClass-bin' stretchy='false'>+</mo> <msup><mrow><mi>τ</mi></mrow><mrow><mn>2</mn></mrow></msup><mo class='MathClass-close' stretchy='false'>)</mo></mrow></math><span class='cmr-8'>.</span>
+</p>                                                                                                                                                                </div>
+ 
+
+    </div>
+
+    <div class="footer">
+        &copy; 2026 Daksh Mehta
+    </div>
+    <script data-goatcounter="https://daksh-4.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+    <script>
+    (async function () {
+        const repo = 'daksh-4/personal-website';
+        const filename = window.location.pathname.split('/').pop() || '';
+        if (!filename) return;
+        const filePath = 'essays/' + filename;
+        const cacheKey = 'vc_' + filename;
+
+        let commits;
+        try {
+            const cached = sessionStorage.getItem(cacheKey);
+            const cachedAt = sessionStorage.getItem(cacheKey + '_ts');
+            const fresh = cachedAt && (Date.now() - parseInt(cachedAt, 10)) < 5 * 60 * 1000;
+            if (cached && fresh) commits = JSON.parse(cached);
+            else {
+                const res = await fetch(`https://api.github.com/repos/${repo}/commits?path=${filePath}&per_page=100`);
+                if (!res.ok) return;
+                commits = await res.json();
+                sessionStorage.setItem(cacheKey, JSON.stringify(commits));
+                sessionStorage.setItem(cacheKey + '_ts', Date.now().toString());
+            }
+        } catch (e) { return; }
+
+        const publishOnly = commits.filter(c => /^publish:/i.test(c.commit.message.trim())).reverse();
+        if (publishOnly.length === 0) return;
+
+        // The commit that first created this file is always a meaningful
+        // baseline, even if it predates the publish: convention. Prepend it
+        // so the slider's earliest stop is a real draft, not a duplicate of
+        // the first publish (which may be byte-identical to it).
+        const chronological = commits.slice().reverse();
+        const firstCommit = chronological[0];
+        const versions = (firstCommit && firstCommit.sha !== publishOnly[0].sha)
+            ? [firstCommit, ...publishOnly]
+            : publishOnly;
+
+        const bar        = document.getElementById('version-bar');
+        const slider     = document.getElementById('version-slider');
+        const label      = document.getElementById('version-label');
+        const diffLabel  = document.getElementById('diff-label');
+        const diffToggle = document.getElementById('diff-toggle');
+        const contentEl  = document.querySelector('.content');
+        const currentHTML = contentEl.innerHTML;
+        const cache = {};
+        let activePos = versions.length;
+
+        slider.max   = versions.length;
+        slider.value = versions.length;
+
+        function fmtDate(iso) {
+            return new Date(iso).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+
+        function setLabel(pos) {
+            if (pos === versions.length) {
+                label.textContent = 'Current version';
+                diffLabel.style.display = '';
+            } else {
+                const v = versions[pos];
+                const msg = v.commit.message.trim().replace(/^publish:\s*/i, '');
+                label.textContent = fmtDate(v.commit.author.date) + (msg ? ' — ' + msg : '');
+                diffLabel.style.display = 'none';
+            }
+        }
+
+        function getBlocks(html) {
+            const d = document.createElement('div');
+            d.innerHTML = html;
+            return Array.from(d.children).map(el => ({
+                html: el.outerHTML,
+                key:  el.textContent.replace(/\s+/g, ' ').trim()
+            })).filter(b => b.key);
+        }
+
+        function blockDiff(oldB, newB) {
+            const m = oldB.length, n = newB.length;
+            if (m * n > 100000) return null;
+            const dp = Array.from({length: m + 1}, () => new Int32Array(n + 1));
+            for (let i = 1; i <= m; i++)
+                for (let j = 1; j <= n; j++)
+                    dp[i][j] = oldB[i-1].key === newB[j-1].key
+                        ? dp[i-1][j-1] + 1 : Math.max(dp[i-1][j], dp[i][j-1]);
+            const ops = [];
+            let i = m, j = n;
+            while (i > 0 || j > 0) {
+                if (i > 0 && j > 0 && oldB[i-1].key === newB[j-1].key) {
+                    ops.unshift({t:'=', b: newB[j-1]}); i--; j--;
+                } else if (j > 0 && (i === 0 || dp[i][j-1] >= dp[i-1][j])) {
+                    ops.unshift({t:'+', b: newB[j-1]}); j--;
+                } else {
+                    ops.unshift({t:'-', b: oldB[i-1]}); i--;
+                }
+            }
+            return ops;
+        }
+
+        function tokenize(text) { return text.split(/\s+/).filter(Boolean); }
+
+        function wordDiff(a, b) {
+            const m = a.length, n = b.length;
+            if (m * n > 4000000) return null;
+            const dp = Array.from({length: m + 1}, () => new Int32Array(n + 1));
+            for (let i = 1; i <= m; i++)
+                for (let j = 1; j <= n; j++)
+                    dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] + 1 : Math.max(dp[i-1][j], dp[i][j-1]);
+            const ops = [];
+            let i = m, j = n;
+            while (i > 0 || j > 0) {
+                if (i > 0 && j > 0 && a[i-1] === b[j-1]) { ops.unshift({t:'=',s:a[i-1]}); i--; j--; }
+                else if (j > 0 && (i === 0 || dp[i][j-1] >= dp[i-1][j])) { ops.unshift({t:'+',s:b[j-1]}); j--; }
+                else { ops.unshift({t:'-',s:a[i-1]}); i--; }
+            }
+            return ops;
+        }
+
+        function addedBlock(inner) {
+            return '<div style="background:#d4edda;border-radius:3px;padding:0 4px;margin:2px 0;">' + inner + '</div>';
+        }
+
+        function removedBlock(inner) {
+            return '<div style="background:#f8d7da;color:#721c24;text-decoration:line-through;border-radius:3px;padding:0 4px;margin:2px 0;opacity:0.8;">' + inner + '</div>';
+        }
+
+        function makeMark(text, isAdd) {
+            const el = document.createElement('mark');
+            el.setAttribute('style', isAdd
+                ? 'background:#d4edda;text-decoration:none;'
+                : 'background:#f8d7da;text-decoration:line-through;color:#721c24;');
+            el.textContent = text;
+            return el;
+        }
+
+        function collectTokens(container) {
+            const tokens = [];
+            const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+            let node;
+            while ((node = walker.nextNode())) {
+                const s = node.nodeValue;
+                const re = /\S+/g;
+                let m;
+                while ((m = re.exec(s))) {
+                    tokens.push({ word: m[0], node: node, start: m.index, end: m.index + m[0].length });
+                }
+            }
+            return tokens;
+        }
+
+        // Diffs reworded blocks *in place*. The new blocks keep their own HTML
+        // (headings stay headings, lists stay lists, links and the monospace
+        // spans make4ht emits for \texttt all survive) and only the individual
+        // changed words inside their text nodes get wrapped in a mark.
+        function renderInlineDiff(oldText, insOps) {
+            const container = document.createElement('div');
+            container.innerHTML = insOps.map(op => op.b.html).join('');
+            const newTokens = collectTokens(container);
+            if (!newTokens.length) return null;
+            const ops = wordDiff(tokenize(oldText), newTokens.map(t => t.word));
+            if (!ops) return null;
+
+            const added = new Array(newTokens.length).fill(false);
+            const removedBefore = new Map();
+            let ni = 0;
+            for (const op of ops) {
+                if (op.t === '=') ni++;
+                else if (op.t === '+') { added[ni] = true; ni++; }
+                else {
+                    if (!removedBefore.has(ni)) removedBefore.set(ni, []);
+                    removedBefore.get(ni).push(op.s);
+                }
+            }
+
+            const byNode = new Map();
+            newTokens.forEach((t, i) => {
+                if (!byNode.has(t.node)) byNode.set(t.node, []);
+                byNode.get(t.node).push(i);
+            });
+
+            byNode.forEach((idxs, node) => {
+                const s = node.nodeValue;
+                const frag = document.createDocumentFragment();
+                let cursor = 0, k = 0;
+                while (k < idxs.length) {
+                    const i = idxs[k];
+                    const t = newTokens[i];
+                    if (t.start > cursor) frag.appendChild(document.createTextNode(s.slice(cursor, t.start)));
+                    const gone = removedBefore.get(i);
+                    if (gone) {
+                        frag.appendChild(makeMark(gone.join(' '), false));
+                        frag.appendChild(document.createTextNode(' '));
+                    }
+                    if (added[i]) {
+                        // Extend over adjacent added words so a run highlights as
+                        // one band, gaps included, instead of striping per word.
+                        let k2 = k;
+                        while (k2 + 1 < idxs.length
+                               && added[idxs[k2 + 1]]
+                               && idxs[k2 + 1] === idxs[k2] + 1
+                               && !removedBefore.has(idxs[k2 + 1])) k2++;
+                        const last = newTokens[idxs[k2]];
+                        frag.appendChild(makeMark(s.slice(t.start, last.end), true));
+                        cursor = last.end;
+                        k = k2 + 1;
+                    } else {
+                        frag.appendChild(document.createTextNode(t.word));
+                        cursor = t.end;
+                        k++;
+                    }
+                }
+                if (cursor < s.length) frag.appendChild(document.createTextNode(s.slice(cursor)));
+                node.parentNode.replaceChild(frag, node);
+            });
+
+            const trailing = removedBefore.get(newTokens.length);
+            if (trailing) {
+                const host = container.lastElementChild || container;
+                host.appendChild(document.createTextNode(' '));
+                host.appendChild(makeMark(trailing.join(' '), false));
+            }
+
+            return container.innerHTML;
+        }
+
+        function renderBlockDiff(ops) {
+            let html = '', i = 0;
+            while (i < ops.length) {
+                if (ops[i].t === '=') {
+                    html += ops[i].b.html; i++;
+                } else {
+                    const dels = [], ins = [];
+                    while (i < ops.length && ops[i].t === '-') { dels.push(ops[i]); i++; }
+                    while (i < ops.length && ops[i].t === '+') { ins.push(ops[i]); i++; }
+                    if (!dels.length) {
+                        ins.forEach(op => { html += addedBlock(op.b.html); });
+                    } else if (!ins.length) {
+                        dels.forEach(op => { html += removedBlock(op.b.html); });
+                    } else {
+                        const inline = renderInlineDiff(dels.map(o => o.b.key).join(' '), ins);
+                        if (inline) {
+                            html += inline;
+                        } else {
+                            dels.forEach(op => { html += removedBlock(op.b.html); });
+                            ins.forEach(op => { html += addedBlock(op.b.html); });
+                        }
+                    }
+                }
+            }
+            return html;
+        }
+
+        async function fetchOld(sha) {
+            if (cache[sha]) return;
+            try {
+                const r = await fetch(`https://raw.githubusercontent.com/${repo}/${sha}/${filePath}`);
+                const text = await r.text();
+                const doc = new DOMParser().parseFromString(text, 'text/html');
+                const old = doc.querySelector('.content');
+                cache[sha] = old ? old.innerHTML : '';
+            } catch (e) {
+                cache[sha] = '';
+            }
+        }
+
+        function blockKeys(html) {
+            return getBlocks(html).map(b => b.key).join('\u0001');
+        }
+
+        // Untagged commits made after the most recent publish: are corrections
+        // to that published version, not a version of their own. So the live
+        // page counts as the latest version, and the meaningful comparison is
+        // against the slider stop *before* it. Anchoring on the most recent
+        // publish instead would reduce the diff to whatever typo was fixed last.
+        async function getDiffTarget() {
+            const anchor = versions[Math.max(0, versions.length - 2)];
+            await fetchOld(anchor.sha);
+            const oldHTML = cache[anchor.sha];
+            if (!oldHTML || blockKeys(oldHTML) === blockKeys(currentHTML)) return null;
+            return { oldHTML: oldHTML, newHTML: currentHTML };
+        }
+
+        async function showContent(pos) {
+            contentEl.style.opacity = '0';
+            await new Promise(r => setTimeout(r, 150));
+            if (pos === versions.length) {
+                if (diffToggle.checked) {
+                    const target = await getDiffTarget();
+                    if (target) {
+                        const ops = blockDiff(getBlocks(target.oldHTML), getBlocks(target.newHTML));
+                        contentEl.innerHTML = ops ? renderBlockDiff(ops) : currentHTML;
+                    } else {
+                        contentEl.innerHTML = currentHTML;
+                    }
+                } else {
+                    contentEl.innerHTML = currentHTML;
+                }
+            } else {
+                const sha = versions[pos].sha;
+                await fetchOld(sha);
+                contentEl.innerHTML = cache[sha] || currentHTML;
+            }
+            activePos = pos;
+            contentEl.style.opacity = '1';
+        }
+
+        setLabel(versions.length);
+        bar.style.display = 'block';
+
+        slider.addEventListener('input', () => setLabel(parseInt(slider.value)));
+        slider.addEventListener('change', async () => {
+            const pos = parseInt(slider.value);
+            if (pos === activePos) return;
+            await showContent(pos);
+        });
+        diffToggle.addEventListener('change', () => showContent(activePos));
+    })();
+    </script>
+</body>
+</html>
