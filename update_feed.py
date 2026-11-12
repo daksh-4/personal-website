@@ -8,8 +8,7 @@ An entry is created for:
     rest of the message becomes the note shown next to it)
 
 Only essays listed in essays.json are included, so unlisted pages (such as
-the MCQ answers) never appear. An essay contributes at most MAX_PER_ESSAY
-entries, so a page that changes often cannot crowd out the rest. A commit that touches more than
+the MCQ answers) never appear. A commit that touches more than
 MAX_PAGES_PER_COMMIT essay pages is treated as a site-wide change (a template
 fix, a bulk import) and skipped, so it cannot flood the list.
 
@@ -31,7 +30,6 @@ import sys
 from datetime import datetime
 
 LIMIT = 6
-MAX_PER_ESSAY = 2
 MAX_PAGES_PER_COMMIT = 3
 INDEX = "index.html"
 START, END = "<!-- UPDATES-START -->", "<!-- UPDATES-END -->"
@@ -98,16 +96,13 @@ def build_entries(listed):
                             "new": is_new, "note": note})
     entries.sort(key=lambda e: e["date"], reverse=True)
 
-    # A page that is updated often (the MCQs) must not push every other essay
-    # off the list, so keep only its most recent MAX_PER_ESSAY entries.
     # An essay's "New essay" line is redundant once a later revision of it is
     # already showing, so it is dropped in that case.
-    kept, per_essay = [], {}
+    kept, seen = [], set()
     for e in entries:
-        n = per_essay.get(e["url"], 0)
-        if n >= MAX_PER_ESSAY or (e["new"] and n > 0):
+        if e["new"] and e["url"] in seen:
             continue
-        per_essay[e["url"]] = n + 1
+        seen.add(e["url"])
         kept.append(e)
     return kept[:LIMIT]
 
